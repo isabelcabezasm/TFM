@@ -94,6 +94,10 @@ namespace GetMovies
             foreach (var movie in dMovie.Results)
             {
                 Console.WriteLine($"Movie name: {movie.Title}, {movie.VoteAverage}");
+                Movie m = await client.GetMovieAsync(movie.Id, MovieMethods.Credits | MovieMethods.Keywords);
+                Console.WriteLine($"Main character: {m.Credits.Cast[0].Name} ({m.Credits.Cast[0].Id} ) - {m.Credits.Cast[0].Gender})");
+                Console.WriteLine($"Main character 2: {m.Credits.Cast[1].Name} ({m.Credits.Cast[1].Id} ) - {m.Credits.Cast[1].Gender})");
+
             }
 
 
