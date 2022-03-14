@@ -2,32 +2,8 @@
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
 
-GetMovies/.vscode/launch.json
-GetMovies/.vscode/tasks.json
-GetMovies/bin/Debug/net6.0/GetMovies.deps.json
-GetMovies/bin/Debug/net6.0/GetMovies.dll
-GetMovies/bin/Debug/net6.0/GetMovies.exe
-GetMovies/bin/Debug/net6.0/GetMovies.pdb
-GetMovies/bin/Debug/net6.0/GetMovies.runtimeconfig.json
-GetMovies/bin/Debug/net6.0/Newtonsoft.Json.dll
-GetMovies/bin/Debug/net6.0/TMDbLib.dll
-GetMovies/obj/GetMovies.csproj.nuget.dgspec.json
-GetMovies/obj/GetMovies.csproj.nuget.g.props
-GetMovies/obj/GetMovies.csproj.nuget.g.targets
-GetMovies/obj/project.assets.json
-GetMovies/obj/project.nuget.cache
-GetMovies/obj/Debug/net6.0/.NETCoreApp,Version=v6.0.AssemblyAttributes.cs
-GetMovies/obj/Debug/net6.0/apphost.exe
-GetMovies/obj/Debug/net6.0/GetMovies.AssemblyInfo.cs
-GetMovies/obj/Debug/net6.0/GetMovies.AssemblyInfoInputs.cache
-GetMovies/obj/Debug/net6.0/GetMovies.assets.cache
-GetMovies/obj/Debug/net6.0/GetMovies.csproj.AssemblyReference.cache
-GetMovies/obj/Debug/net6.0/GetMovies.csproj.CoreCompileInputs.cache
-GetMovies/obj/Debug/net6.0/GetMovies.csproj.FileListAbsolute.txt
-GetMovies/obj/Debug/net6.0/GetMovies.dll
-GetMovies/obj/Debug/net6.0/GetMovies.GeneratedMSBuildEditorConfig.editorconfig
-GetMovies/obj/Debug/net6.0/GetMovies.genruntimeconfig.cache
-GetMovies/obj/Debug/net6.0/GetMovies.GlobalUsings.g.cs
-GetMovies/obj/Debug/net6.0/GetMovies.pdb
-GetMovies/obj/Debug/net6.0/ref/GetMovies.dll
-GetMovies/obj/Debug/net6.0/refint/GetMovies.dll
+*/.vscode/* 
+*/bin/*
+*/obj/*
+*/.env
+
