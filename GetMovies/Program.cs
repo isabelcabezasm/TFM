@@ -1,21 +1,22 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading.Tasks;
-using TMDbLib.Client;
+﻿using TMDbLib.Client;
 using TMDbLib.Objects.Collections;
 using TMDbLib.Objects.Discover;
 using TMDbLib.Objects.General;
 using TMDbLib.Objects.Movies;
 using TMDbLib.Objects.Search;
 
-namespace GetMovies
-{
+
+namespace Movies; 
+
     class Program
     {
         static async Task Main(string[] args)
         {
-            TMDbClient client = new TMDbClient("5e45879a14ac15292119ea08a76eab2b");
+
+            Gremlin gremlinClient= new Gremlin();
+            gremlinClient.Connect();
+
+            // TMDbClient client = new TMDbClient("5e45879a14ac15292119ea08a76eab2b");
             // GetMovie1(client);
             // Console.WriteLine("---------------------------");
             // await GetMovie2Async(client);
@@ -24,7 +25,7 @@ namespace GetMovies
             // Console.WriteLine("---------------------------");
             // GetJamesBondMovies(client);
             // Console.WriteLine("---------------------------");
-            await GetTopRatedMovies2021Async(client);
+            // await GetTopRatedMovies2021Async(client);
         }
 
 
@@ -106,4 +107,3 @@ namespace GetMovies
         }
 
     }
-}
