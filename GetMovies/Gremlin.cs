@@ -3,6 +3,7 @@ using Gremlin.Net.Driver;
 using Gremlin.Net.Driver.Exceptions;
 using Gremlin.Net.Structure.IO.GraphSON;
 using Newtonsoft.Json;
+using TMDbLib.Objects.Movies;
 
 namespace Movies;
 
@@ -15,9 +16,11 @@ namespace Movies;
         private static string Container => Environment.GetEnvironmentVariable("ContainerName") ?? throw new ArgumentException("Missing env var: ContainerName");        
         private static int Port => 443;
         private static bool EnableSSL => true;
-        
 
-        public void Connect()
+        private static GremlinClient gremlinClient; 
+
+
+        public Gremlin()
         {
             string containerLink = "/dbs/" + Database + "/colls/" + Container;
             Console.WriteLine($"Connecting to: host: {Host}, port: {Port}, container: {containerLink}, ssl: {EnableSSL}");
@@ -39,14 +42,48 @@ namespace Movies;
                     options.KeepAliveInterval = TimeSpan.FromSeconds(10);
                 });
 
-            using (var gremlinClient = new GremlinClient(
-                gremlinServer, 
-                new GraphSON2Reader(), 
-                new GraphSON2Writer(), 
-                GremlinClient.GraphSON2MimeType, 
-                connectionPoolSettings, 
-                webSocketConfiguration))
+            gremlinClient = new GremlinClient(
+                                gremlinServer, 
+                                new GraphSON2Reader(), 
+                                new GraphSON2Writer(), 
+                                GremlinClient.GraphSON2MimeType, 
+                                connectionPoolSettings, 
+                                webSocketConfiguration);
+
+        }
+
+        public void InsertMovie(Movie movie)
+        {
+            string query =  $"g.addV('movie')"+
+                                $".property('id', '{movie.Id}')" + 
+                                $".property('title', '{movie.Title}')"+
+                                $".property('release_year', {movie.ReleaseDate!.Value.Year})"+
+                                $".property('vote_avg', {movie.VoteAverage})"+
+                                $".property('vote_count', {movie.VoteCount})"+
+                                $".property('pk', 'pk')" ;
+
+            Console.WriteLine(String.Format("Running this query: {0}", query));
+
+             var resultSet = SubmitRequest(gremlinClient, query).Result;
+            if (resultSet.Count > 0)
             {
+                Console.WriteLine("\tResult:");
+                foreach (var result in resultSet)
+                {
+                    // The vertex results are formed as Dictionaries with a nested dictionary for their properties
+                    string output = JsonConvert.SerializeObject(result);
+                    Console.WriteLine($"\t{output}");
+                }
+                Console.WriteLine();
+            }
+
+        }
+        
+
+        public void Query()
+        {         
+
+
             // </defineClientandServerObjects>
                 
                 // <executeQueries>
@@ -76,7 +113,7 @@ namespace Movies;
                     PrintStatusAttributes(resultSet.StatusAttributes);
                     Console.WriteLine();
                 }
-            }
+
 
         }
 
@@ -126,6 +163,33 @@ namespace Movies;
             //{ "DropVertex",     "g.V('thomas').drop()" },
         };
         // </defineQueries>
+
+        private static Task<ResultSet<dynamic>> SubmitRequest(GremlinClient gremlinClient,string query)
+        {
+            try
+            {
+                return gremlinClient.SubmitAsync<dynamic>(query);
+            }
+            catch (ResponseException e)
+            {
+                Console.WriteLine("\tRequest Error!");
+
+                // Print the Gremlin status code.
+                Console.WriteLine($"\tStatusCode: {e.StatusCode}");
+
+                // On error, ResponseException.StatusAttributes will include the common StatusAttributes for successful requests, as well as
+                // additional attributes for retry handling and diagnostics.
+                // These include:
+                //  x-ms-retry-after-ms         : The number of milliseconds to wait to retry the operation after an initial operation was throttled. This will be populated when
+                //                              : attribute 'x-ms-status-code' returns 429.
+                //  x-ms-activity-id            : Represents a unique identifier for the operation. Commonly used for troubleshooting purposes.
+                PrintStatusAttributes(e.StatusAttributes);
+                Console.WriteLine($"\t[\"x-ms-retry-after-ms\"] : { GetValueAsString(e.StatusAttributes, "x-ms-retry-after-ms")}");
+                Console.WriteLine($"\t[\"x-ms-activity-id\"] : { GetValueAsString(e.StatusAttributes, "x-ms-activity-id")}");
+
+                throw;
+            }
+        }
 
         private static Task<ResultSet<dynamic>> SubmitRequest(GremlinClient gremlinClient, KeyValuePair<string, string> query)
         {

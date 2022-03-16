@@ -8,12 +8,22 @@ namespace Movies;
     static async Task Main(string[] args)
     {
         TMDb TMDbclient = new TMDb();
-        var movies = await TMDbclient.GetTopPopularMoviesByYearAsync(2021, 150);
-        printMovies(movies);
+        var movie = await TMDbclient.GetMovieWithCastByIdAsync(766798);
+        printMovie(movie);
+
+        Gremlin connector = new Gremlin();
+        connector.InsertMovie(movie);
+        // var movies = await TMDbclient.GetTopPopularMoviesByYearAsync(2021, 20);
+        // printMovies(movies);
+
+
+
+
+
     }
 
     private static void printMovie(Movie movie) =>
-        Console.WriteLine($"Movie: {movie.Id} - {movie.Title}, ({movie.ReleaseDate!.Value.Year}), {movie.Popularity} " +
+        Console.WriteLine($"Movie: {movie.Id} - {movie.Title}, ({movie.ReleaseDate!.Value.Year}), {movie.VoteCount} " +
         $"\nOverview: {movie.Overview}");      
 
     private static void printMovieWithCast(Movie movie) =>
