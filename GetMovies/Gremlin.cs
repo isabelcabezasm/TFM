@@ -1,9 +1,11 @@
 using System.Net.WebSockets;
+using Movies;
 using Gremlin.Net.Driver;
 using Gremlin.Net.Driver.Exceptions;
 using Gremlin.Net.Structure.IO.GraphSON;
 using Newtonsoft.Json;
 using TMDbLib.Objects.Movies;
+using TMDbLib.Objects.People;
 
 namespace Movies;
 
@@ -11,14 +13,15 @@ namespace Movies;
     {
         
         private static string Host => Environment.GetEnvironmentVariable("Host") ?? throw new ArgumentException("Missing env var: Host");
-        private static string PrimaryKey => Environment.GetEnvironmentVariable("PrimaryKey") ?? throw new ArgumentException("Missing env var: PrimaryKey");
+
+
+    private static string PrimaryKey => Environment.GetEnvironmentVariable("PrimaryKey") ?? throw new ArgumentException("Missing env var: PrimaryKey");
         private static string Database => Environment.GetEnvironmentVariable("DatabaseName") ?? throw new ArgumentException("Missing env var: DatabaseName");
         private static string Container => Environment.GetEnvironmentVariable("ContainerName") ?? throw new ArgumentException("Missing env var: ContainerName");        
         private static int Port => 443;
         private static bool EnableSSL => true;
 
         private static GremlinClient gremlinClient; 
-
 
         public Gremlin()
         {
@@ -60,11 +63,51 @@ namespace Movies;
                                 $".property('release_year', {movie.ReleaseDate!.Value.Year})"+
                                 $".property('vote_avg', {movie.VoteAverage})"+
                                 $".property('vote_count', {movie.VoteCount})"+
+                                $".property('pk', 'pk')" ;            
+
+            SendRequest(query);
+        }
+                
+        public void InsertPerson(Person cast)
+        {
+            if(!PersonExists(cast.Id))
+            {
+                string query =  $"g.addV('cast')"+
+                                $".property('id', '{cast.Id}')" + 
+                                $".property('name', '{cast.Name}')"+
+                                $".property('sex', '{cast.Gender}')"+
                                 $".property('pk', 'pk')" ;
+            
+                SendRequest(query);
+            }
+            
+        }
 
+        public void InsertInterpretation(Character character)
+        {
+            string query =  $"g.V('{character.PersonId}')"+
+                             $".addE('plays')"+
+                             $".to(g.V('{character.MovieId}'))"+
+                             $".property('importance_level', {character.ImportanceLevel})" +
+                             $".property('age', {character.Age})";            
+
+            SendRequest(query);                       
+        }
+
+        private bool PersonExists(int id)
+        {
+            var query = $"g.V().hasLabel('cast').has('id', '{id}')";
+            
             Console.WriteLine(String.Format("Running this query: {0}", query));
+            var resultSet = SubmitRequest(gremlinClient, query).Result;
+            return (resultSet.Count > 0);
+            
+        }
 
-             var resultSet = SubmitRequest(gremlinClient, query).Result;
+        private void SendRequest(String query)
+        {
+            Console.WriteLine(String.Format("Running this query: {0}", query));
+            var resultSet = SubmitRequest(gremlinClient, query).Result;
             if (resultSet.Count > 0)
             {
                 Console.WriteLine("\tResult:");
@@ -78,7 +121,14 @@ namespace Movies;
             }
 
         }
+
+
         
+        public void Clean()
+        {
+            string query =  $"g.V().drop()";
+            SendRequest(query);
+        }
 
         public void Query()
         {         
@@ -225,7 +275,6 @@ namespace Movies;
             Console.WriteLine($"\t[\"x-ms-total-server-time-ms\"] : { GetValueAsString(attributes, "x-ms-total-server-time-ms")}");
             Console.WriteLine($"\t[\"x-ms-total-request-charge\"] : { GetValueAsString(attributes, "x-ms-total-request-charge")}");
         }
-
         
         public static string GetValueAsString(IReadOnlyDictionary<string, object> dictionary, string key)
         {
@@ -241,7 +290,6 @@ namespace Movies;
 
             return null;
         }
-
 
 
     }   

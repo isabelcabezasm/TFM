@@ -3,6 +3,7 @@ using TMDbLib.Objects.Collections;
 using TMDbLib.Objects.Discover;
 using TMDbLib.Objects.General;
 using TMDbLib.Objects.Movies;
+using TMDbLib.Objects.People;
 using TMDbLib.Objects.Search;
 
 namespace Movies;
@@ -15,8 +16,17 @@ public class TMDb
     public async Task<Movie> GetMovieWithCastByIdAsync(int id)
     {
         Movie movie = await client.GetMovieAsync(id, MovieMethods.Credits);
+        movie.Title = movie.Title.Replace("'", "\\'");
         return movie;
     }
+    
+    public async Task<Person> GetCastByIdAsync(int id)
+    {
+        Person actor = await client.GetPersonAsync(id);
+        actor.Name = actor.Name.Replace("'", "\\'");
+        return actor;
+    }
+  
 
     public async Task<List<Movie>> GetTopPopularMoviesByYearAsync(int year, int numMovies)
     {   

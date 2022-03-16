@@ -8,16 +8,42 @@ namespace Movies;
     static async Task Main(string[] args)
     {
         TMDb TMDbclient = new TMDb();
-        var movie = await TMDbclient.GetMovieWithCastByIdAsync(766798);
-        printMovie(movie);
-
         Gremlin connector = new Gremlin();
-        connector.InsertMovie(movie);
-        // var movies = await TMDbclient.GetTopPopularMoviesByYearAsync(2021, 20);
-        // printMovies(movies);
+
+        connector.Clean();
+
+        var movies = await TMDbclient.GetTopPopularMoviesByYearAsync(2021, 10);
+        foreach (var m in movies)
+        {
+            var movie = await TMDbclient.GetMovieWithCastByIdAsync(m.Id);            
+            printMovie(movie);
+
+            connector.InsertMovie(movie);
+
+            for (int i = 0; i <10; i++)
+            {
+                Cast cast = movie.Credits.Cast[i];
+                var person = await TMDbclient.GetCastByIdAsync(cast.Id);                
+
+                if(movie.ReleaseDate != null && person.Birthday != null)
+                {
+                    connector.InsertPerson(person);
+                    Character character = new Character(movie.Id, 
+                                                    cast.Id, 
+                                                    movie.ReleaseDate!.Value.Year, 
+                                                    person.Birthday!.Value.Year, 
+                                                    cast.Character, i);
+                
+                    connector.InsertInterpretation(character);
+
+                }
+                
+
+            }
 
 
 
+        }
 
 
     }
