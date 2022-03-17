@@ -15,8 +15,9 @@ namespace Movies;
         private static string Host => Environment.GetEnvironmentVariable("Host") ?? throw new ArgumentException("Missing env var: Host");
 
 
-    private static string PrimaryKey => Environment.GetEnvironmentVariable("PrimaryKey") ?? throw new ArgumentException("Missing env var: PrimaryKey");
+        private static string PrimaryKey => Environment.GetEnvironmentVariable("PrimaryKey") ?? throw new ArgumentException("Missing env var: PrimaryKey");
         private static string Database => Environment.GetEnvironmentVariable("DatabaseName") ?? throw new ArgumentException("Missing env var: DatabaseName");
+
         private static string Container => Environment.GetEnvironmentVariable("ContainerName") ?? throw new ArgumentException("Missing env var: ContainerName");        
         private static int Port => 443;
         private static bool EnableSSL => true;
@@ -68,19 +69,29 @@ namespace Movies;
             SendRequest(query);
         }
                 
-        public void InsertPerson(Person cast)
+        public void InsertCast(Person cast)
+        {
+            InsertPerson(cast, "cast");       
+        }
+
+        public void InsertDirector(Person cast)
+        {
+            InsertPerson(cast, "director");         
+        }
+
+
+        private void InsertPerson(Person cast, string type)
         {
             if(!PersonExists(cast.Id))
             {
-                string query =  $"g.addV('cast')"+
+                string query =  $"g.addV('{type}')"+
                                 $".property('id', '{cast.Id}')" + 
                                 $".property('name', '{cast.Name}')"+
                                 $".property('sex', '{cast.Gender}')"+
                                 $".property('pk', 'pk')" ;
             
                 SendRequest(query);
-            }
-            
+            }            
         }
 
         public void InsertInterpretation(Character character)
@@ -94,6 +105,15 @@ namespace Movies;
             SendRequest(query);                       
         }
 
+
+        public void InsertDirection(int movieId, int directorId)
+        {
+            string query =  $"g.V('{directorId}')"+
+                    $".addE('directedBy')"+
+                    $".to(g.V('{movieId}'))";            
+
+            SendRequest(query);    
+        }
         private bool PersonExists(int id)
         {
             var query = $"g.V().hasLabel('cast').has('id', '{id}')";

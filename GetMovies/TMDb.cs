@@ -17,6 +17,7 @@ public class TMDb
     {
         Movie movie = await client.GetMovieAsync(id, MovieMethods.Credits);
         movie.Title = movie.Title.Replace("'", "\\'");
+        
         return movie;
     }
     
@@ -26,7 +27,30 @@ public class TMDb
         actor.Name = actor.Name.Replace("'", "\\'");
         return actor;
     }
-  
+
+    public List<Person> GetDirectorsFromMovie(Movie movie)
+    {
+        var directorCrew = movie.Credits.Crew.Where(c => c.Job =="Director" && c.Department == "Directing");
+        var directors = GetPeopleFromCrew(directorCrew);
+        return directors;
+
+    }
+
+    private List<Person> GetPeopleFromCrew(IEnumerable<Crew> directorCrew)
+    {
+        List<Person> directores = new List<Person>();
+        foreach (var d in directorCrew)
+        {
+            Person director = new Person();
+            director.Name = d.Name;
+            director.Id = d.Id;
+            director.Gender = d.Gender;
+
+            directores.Add(director);
+        }
+
+        return directores;
+    }
 
     public async Task<List<Movie>> GetTopPopularMoviesByYearAsync(int year, int numMovies)
     {   
@@ -77,4 +101,5 @@ public class TMDb
         return movie;
     }
 
+     
 }

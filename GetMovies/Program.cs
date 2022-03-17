@@ -1,10 +1,9 @@
 ﻿using TMDbLib.Objects.Movies;
 
-
 namespace Movies; 
 
-    class Program
-    {
+class Program
+{
     static async Task Main(string[] args)
     {
         TMDb TMDbclient = new TMDb();
@@ -12,13 +11,21 @@ namespace Movies;
 
         connector.Clean();
 
-        var movies = await TMDbclient.GetTopPopularMoviesByYearAsync(2021, 10);
+        var movies = await TMDbclient.GetTopPopularMoviesByYearAsync(2021, 1);
         foreach (var m in movies)
         {
-            var movie = await TMDbclient.GetMovieWithCastByIdAsync(m.Id);            
+            var movie = await TMDbclient.GetMovieWithCastByIdAsync(m.Id);                  
             printMovie(movie);
 
             connector.InsertMovie(movie);
+            
+            // Directors
+            var directors = TMDbclient.GetDirectorsFromMovie(movie);
+            foreach(var director in directors)
+            {
+                connector.InsertDirector(director);
+                connector.InsertDirection(movie.Id, director.Id);
+            }
 
             for (int i = 0; i <10; i++)
             {
@@ -27,7 +34,7 @@ namespace Movies;
 
                 if(movie.ReleaseDate != null && person.Birthday != null)
                 {
-                    connector.InsertPerson(person);
+                    connector.InsertCast(person);
                     Character character = new Character(movie.Id, 
                                                     cast.Id, 
                                                     movie.ReleaseDate!.Value.Year, 
@@ -35,17 +42,9 @@ namespace Movies;
                                                     cast.Character, i);
                 
                     connector.InsertInterpretation(character);
-
-                }
-                
-
+                }  
             }
-
-
-
         }
-
-
     }
 
     private static void printMovie(Movie movie) =>
@@ -66,7 +65,5 @@ namespace Movies;
             Console.WriteLine($"Popularity: {movie.Popularity}, Num Votes: {movie.VoteCount}, Vote Avg:: {movie.VoteAverage}  ");
         }
     }
-
-
 
 }
