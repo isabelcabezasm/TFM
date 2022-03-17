@@ -28,6 +28,17 @@ public class TMDb
         return actor;
     }
 
+    public List<ProductionCountry> GetProductionCountriesFromMovie(Movie movie)
+    {
+        List<ProductionCountry> countries = new List<ProductionCountry>();
+        foreach(var pc in movie.ProductionCountries)
+        {
+            countries.Add(new ProductionCountry(pc.Iso_3166_1, pc.Name));
+        }
+                
+        return countries;
+    }
+
     public List<Person> GetDirectorsFromMovie(Movie movie)
     {
         var directorCrew = movie.Credits.Crew.Where(c => c.Job =="Director" && c.Department == "Directing");

@@ -22,39 +22,43 @@ namespace Movies;
         private static int Port => 443;
         private static bool EnableSSL => true;
 
-        private static GremlinClient gremlinClient; 
+        private static GremlinClient gremlinClient;
 
+
+    // Constructor
         public Gremlin()
-        {
-            string containerLink = "/dbs/" + Database + "/colls/" + Container;
-            Console.WriteLine($"Connecting to: host: {Host}, port: {Port}, container: {containerLink}, ssl: {EnableSSL}");
-            var gremlinServer = new GremlinServer(Host, Port, enableSsl: EnableSSL, 
-                                                    username: containerLink, 
-                                                    password: PrimaryKey);
-
-            ConnectionPoolSettings connectionPoolSettings = new ConnectionPoolSettings()
-            {
-                MaxInProcessPerConnection = 10,
-                PoolSize = 30, 
-                ReconnectionAttempts= 3,
-                ReconnectionBaseDelay = TimeSpan.FromMilliseconds(500)
-            };
-
-            var webSocketConfiguration =
-                new Action<ClientWebSocketOptions>(options =>
                 {
-                    options.KeepAliveInterval = TimeSpan.FromSeconds(10);
-                });
+                    string containerLink = "/dbs/" + Database + "/colls/" + Container;
+                    Console.WriteLine($"Connecting to: host: {Host}, port: {Port}, container: {containerLink}, ssl: {EnableSSL}");
+                    var gremlinServer = new GremlinServer(Host, Port, enableSsl: EnableSSL, 
+                                                            username: containerLink, 
+                                                            password: PrimaryKey);
 
-            gremlinClient = new GremlinClient(
-                                gremlinServer, 
-                                new GraphSON2Reader(), 
-                                new GraphSON2Writer(), 
-                                GremlinClient.GraphSON2MimeType, 
-                                connectionPoolSettings, 
-                                webSocketConfiguration);
+                    ConnectionPoolSettings connectionPoolSettings = new ConnectionPoolSettings()
+                    {
+                        MaxInProcessPerConnection = 10,
+                        PoolSize = 30, 
+                        ReconnectionAttempts= 3,
+                        ReconnectionBaseDelay = TimeSpan.FromMilliseconds(500)
+                    };
 
-        }
+                    var webSocketConfiguration =
+                        new Action<ClientWebSocketOptions>(options =>
+                        {
+                            options.KeepAliveInterval = TimeSpan.FromSeconds(10);
+                        });
+
+                    gremlinClient = new GremlinClient(
+                                        gremlinServer, 
+                                        new GraphSON2Reader(), 
+                                        new GraphSON2Writer(), 
+                                        GremlinClient.GraphSON2MimeType, 
+                                        connectionPoolSettings, 
+                                        webSocketConfiguration);
+
+                }
+
+        /**Insert nodes **/
 
         public void InsertMovie(Movie movie)
         {
@@ -78,6 +82,57 @@ namespace Movies;
         {
             InsertPerson(cast, "director");         
         }
+        
+        public void InsertCountry(ProductionCountry country)
+        {
+            string query =  $"g.addV('country')"+
+                                $".property('id', '{country.Code}')" + 
+                                $".property('name', '{country.Name}')"+
+                                $".property('pk', 'pk')" ;  
+
+            SendRequest(query);
+        }
+
+        /**Insert edges **/
+
+        public void InsertInterpretation(Character character)
+        {
+            string query =  $"g.V('{character.PersonId}')"+
+                             $".addE('plays')"+
+                             $".to(g.V('{character.MovieId}'))"+
+                             $".property('importance_level', {character.ImportanceLevel})" +
+                             $".property('age', {character.Age})";            
+
+            SendRequest(query);                       
+        }
+
+        public void InsertDirection(int movieId, int directorId)
+        {
+            string query =  $"g.V('{directorId}')"+
+                    $".addE('directedBy')"+
+                    $".to(g.V('{movieId}'))";            
+
+            SendRequest(query);    
+        }
+
+        public void InsertProduction(int movieId, string countryCode)
+        {
+            string query =  $"g.V('{countryCode}')"+
+                    $".addE('producedIn')"+
+                    $".to(g.V('{movieId}'))";            
+
+            SendRequest(query);  
+        }
+
+
+
+
+        public void Clean()
+        {
+            string query =  $"g.V().drop()";
+            SendRequest(query);
+        }
+
 
 
         private void InsertPerson(Person cast, string type)
@@ -94,26 +149,6 @@ namespace Movies;
             }            
         }
 
-        public void InsertInterpretation(Character character)
-        {
-            string query =  $"g.V('{character.PersonId}')"+
-                             $".addE('plays')"+
-                             $".to(g.V('{character.MovieId}'))"+
-                             $".property('importance_level', {character.ImportanceLevel})" +
-                             $".property('age', {character.Age})";            
-
-            SendRequest(query);                       
-        }
-
-
-        public void InsertDirection(int movieId, int directorId)
-        {
-            string query =  $"g.V('{directorId}')"+
-                    $".addE('directedBy')"+
-                    $".to(g.V('{movieId}'))";            
-
-            SendRequest(query);    
-        }
         private bool PersonExists(int id)
         {
             var query = $"g.V().hasLabel('cast').has('id', '{id}')";
@@ -141,14 +176,9 @@ namespace Movies;
             }
 
         }
-
-
         
-        public void Clean()
-        {
-            string query =  $"g.V().drop()";
-            SendRequest(query);
-        }
+
+
 
         public void Query()
         {         

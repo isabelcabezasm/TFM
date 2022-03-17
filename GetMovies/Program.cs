@@ -27,6 +27,23 @@ class Program
                 connector.InsertDirection(movie.Id, director.Id);
             }
 
+            //Countries
+            var productionCountries = TMDbclient.GetProductionCountriesFromMovie(movie);
+            foreach(var country in productionCountries)
+            {
+                connector.InsertCountry(country);
+                connector.InsertProduction(movie.Id, country.Code);
+            }
+
+            //Gendres
+            // var movieGendres = TMDbclient.GetGendresFromMovie(movie);
+            // foreach(var gendre in movieGendres)
+            // {
+            //     connector.InsertGendre(gendre);
+            //     connector.InsertClassification(movie.Id, gendre.Id);
+            // }
+
+
             for (int i = 0; i <10; i++)
             {
                 Cast cast = movie.Credits.Cast[i];
