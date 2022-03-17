@@ -6,6 +6,7 @@ using Gremlin.Net.Structure.IO.GraphSON;
 using Newtonsoft.Json;
 using TMDbLib.Objects.Movies;
 using TMDbLib.Objects.People;
+using TMDbLib.Objects.General;
 
 namespace Movies;
 
@@ -25,41 +26,43 @@ namespace Movies;
         private static GremlinClient gremlinClient;
 
 
-    // Constructor
+        // Constructor
         public Gremlin()
+        {
+            string containerLink = "/dbs/" + Database + "/colls/" + Container;
+            Console.WriteLine($"Connecting to: host: {Host}, port: {Port}, container: {containerLink}, ssl: {EnableSSL}");
+            var gremlinServer = new GremlinServer(Host, Port, enableSsl: EnableSSL, 
+                                                    username: containerLink, 
+                                                    password: PrimaryKey);
+
+            ConnectionPoolSettings connectionPoolSettings = new ConnectionPoolSettings()
+            {
+                MaxInProcessPerConnection = 10,
+                PoolSize = 30, 
+                ReconnectionAttempts= 3,
+                ReconnectionBaseDelay = TimeSpan.FromMilliseconds(500)
+            };
+
+            var webSocketConfiguration =
+                new Action<ClientWebSocketOptions>(options =>
                 {
-                    string containerLink = "/dbs/" + Database + "/colls/" + Container;
-                    Console.WriteLine($"Connecting to: host: {Host}, port: {Port}, container: {containerLink}, ssl: {EnableSSL}");
-                    var gremlinServer = new GremlinServer(Host, Port, enableSsl: EnableSSL, 
-                                                            username: containerLink, 
-                                                            password: PrimaryKey);
+                    options.KeepAliveInterval = TimeSpan.FromSeconds(10);
+                });
 
-                    ConnectionPoolSettings connectionPoolSettings = new ConnectionPoolSettings()
-                    {
-                        MaxInProcessPerConnection = 10,
-                        PoolSize = 30, 
-                        ReconnectionAttempts= 3,
-                        ReconnectionBaseDelay = TimeSpan.FromMilliseconds(500)
-                    };
+            gremlinClient = new GremlinClient(
+                                gremlinServer, 
+                                new GraphSON2Reader(), 
+                                new GraphSON2Writer(), 
+                                GremlinClient.GraphSON2MimeType, 
+                                connectionPoolSettings, 
+                                webSocketConfiguration);
 
-                    var webSocketConfiguration =
-                        new Action<ClientWebSocketOptions>(options =>
-                        {
-                            options.KeepAliveInterval = TimeSpan.FromSeconds(10);
-                        });
+        }
 
-                    gremlinClient = new GremlinClient(
-                                        gremlinServer, 
-                                        new GraphSON2Reader(), 
-                                        new GraphSON2Writer(), 
-                                        GremlinClient.GraphSON2MimeType, 
-                                        connectionPoolSettings, 
-                                        webSocketConfiguration);
 
-                }
+
 
         /**Insert nodes **/
-
         public void InsertMovie(Movie movie)
         {
             string query =  $"g.addV('movie')"+
@@ -85,17 +88,34 @@ namespace Movies;
         
         public void InsertCountry(ProductionCountry country)
         {
-            string query =  $"g.addV('country')"+
+            if(!CountryExists(country.Code))
+            {
+                string query =  $"g.addV('country')"+
                                 $".property('id', '{country.Code}')" + 
                                 $".property('name', '{country.Name}')"+
                                 $".property('pk', 'pk')" ;  
 
-            SendRequest(query);
+                SendRequest(query);
+            }
+            
         }
 
-        /**Insert edges **/
+        public void InsertGenre(Genre genre)
+        {
+            if(!GenreExists(genre.Id))
+            {
+                string query =  $"g.addV('genre')"+
+                                $".property('id', '{genre.Id}')" + 
+                                $".property('name', '{genre.Name}')"+
+                                $".property('pk', 'pk')" ;  
 
-        public void InsertInterpretation(Character character)
+                SendRequest(query);
+            }
+        }
+
+
+    /**Insert edges **/
+    public void InsertInterpretation(Character character)
         {
             string query =  $"g.V('{character.PersonId}')"+
                              $".addE('plays')"+
@@ -124,7 +144,14 @@ namespace Movies;
             SendRequest(query);  
         }
 
+        public void InsertClassification(int movieId, int genreId)
+        {
+            string query =  $"g.V('{genreId}')"+
+                    $".addE('classification')"+
+                    $".to(g.V('{movieId}'))";            
 
+            SendRequest(query); 
+        }
 
 
         public void Clean()
@@ -158,6 +185,26 @@ namespace Movies;
             return (resultSet.Count > 0);
             
         }
+        
+        private bool CountryExists(string countryCode)
+        {
+            var query = $"g.V().hasLabel('country').has('id', '{countryCode}')";
+            
+            Console.WriteLine(String.Format("Running this query: {0}", query));
+            var resultSet = SubmitRequest(gremlinClient, query).Result;
+            return (resultSet.Count > 0);
+            
+        }
+
+        private bool GenreExists(int genreId)
+        {
+            var query = $"g.V().hasLabel('genre').has('id', '{genreId}')";
+            
+            Console.WriteLine(String.Format("Running this query: {0}", query));
+            var resultSet = SubmitRequest(gremlinClient, query).Result;
+            return (resultSet.Count > 0);
+        }
+
 
         private void SendRequest(String query)
         {

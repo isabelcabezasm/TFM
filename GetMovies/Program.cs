@@ -35,13 +35,13 @@ class Program
                 connector.InsertProduction(movie.Id, country.Code);
             }
 
-            //Gendres
-            // var movieGendres = TMDbclient.GetGendresFromMovie(movie);
-            // foreach(var gendre in movieGendres)
-            // {
-            //     connector.InsertGendre(gendre);
-            //     connector.InsertClassification(movie.Id, gendre.Id);
-            // }
+            //Genres
+            var movieGenres = TMDbclient.GetGenresFromMovie(movie);
+            foreach(var genre in movieGenres)
+            {
+                connector.InsertGenre(genre);
+                connector.InsertClassification(movie.Id, genre.Id);
+            }
 
 
             for (int i = 0; i <10; i++)

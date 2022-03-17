@@ -39,6 +39,20 @@ public class TMDb
         return countries;
     }
 
+    public List<Genre> GetGenresFromMovie(Movie movie)
+    {
+        List<Genre> genres = new List<Genre>();
+        foreach ( var g in movie.Genres)
+        {
+            Genre genre = new Genre();
+            genre.Id = g.Id;
+            genre.Name = g.Name;
+            genres.Add(genre);
+
+        }        
+        return genres;
+    }
+
     public List<Person> GetDirectorsFromMovie(Movie movie)
     {
         var directorCrew = movie.Credits.Crew.Where(c => c.Job =="Director" && c.Department == "Directing");
