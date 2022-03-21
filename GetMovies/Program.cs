@@ -9,15 +9,16 @@ class Program
         TMDb TMDbclient = new TMDb();
         Gremlin connector = new Gremlin();
 
-        connector.Clean();
+        // connector.Clean();
 
-        var movies = await TMDbclient.GetTopPopularMoviesByYearAsync(2021, 1);
+        var movies = await TMDbclient.GetTopPopularMoviesByYearAsync(2021, 10);
         foreach (var m in movies)
         {
+
             var movie = await TMDbclient.GetMovieWithCastByIdAsync(m.Id);                  
             printMovie(movie);
-
             connector.InsertMovie(movie);
+        
             
             // Directors
             var directors = TMDbclient.GetDirectorsFromMovie(movie);
@@ -47,6 +48,10 @@ class Program
             for (int i = 0; i <10; i++)
             {
                 Cast cast = movie.Credits.Cast[i];
+
+                // espera 5 segundos para no reventar la API de tmdb
+                Thread.Sleep(5000); //will sleep for 5 sec
+
                 var person = await TMDbclient.GetCastByIdAsync(cast.Id);                
 
                 if(movie.ReleaseDate != null && person.Birthday != null)

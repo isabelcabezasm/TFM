@@ -65,15 +65,18 @@ namespace Movies;
         /**Insert nodes **/
         public void InsertMovie(Movie movie)
         {
-            string query =  $"g.addV('movie')"+
-                                $".property('id', '{movie.Id}')" + 
-                                $".property('title', '{movie.Title}')"+
-                                $".property('release_year', {movie.ReleaseDate!.Value.Year})"+
-                                $".property('vote_avg', {movie.VoteAverage})"+
-                                $".property('vote_count', {movie.VoteCount})"+
-                                $".property('pk', 'pk')" ;            
+            if(!MovieExists(movie.Id))
+            {
+                string query =  $"g.addV('movie')"+
+                                    $".property('id', '{movie.Id}')" + 
+                                    $".property('title', '{movie.Title}')"+
+                                    $".property('release_year', {movie.ReleaseDate!.Value.Year})"+
+                                    $".property('vote_avg', {movie.VoteAverage})"+
+                                    $".property('vote_count', {movie.VoteCount})"+
+                                    $".property('pk', 'pk')" ;            
 
-            SendRequest(query);
+                SendRequest(query);
+            }
         }
                 
         public void InsertCast(Person cast)
@@ -114,45 +117,61 @@ namespace Movies;
         }
 
 
-    /**Insert edges **/
-    public void InsertInterpretation(Character character)
+        /**Insert edges **/
+        public void InsertInterpretation(Character character)
         {
-            string query =  $"g.V('{character.PersonId}')"+
-                             $".addE('plays')"+
-                             $".to(g.V('{character.MovieId}'))"+
-                             $".property('importance_level', {character.ImportanceLevel})" +
-                             $".property('age', {character.Age})";            
+             if(!InterpretationExists(character.MovieId, character.PersonId))
+             {
 
-            SendRequest(query);                       
+                string query =  $"g.V('{character.PersonId}')"+
+                                $".addE('plays')"+
+                                $".to(g.V('{character.MovieId}'))"+
+                                $".property('importance_level', {character.ImportanceLevel})" +
+                                $".property('age', {character.Age})";            
+
+                SendRequest(query);    
+             }                   
         }
 
         public void InsertDirection(int movieId, int directorId)
         {
-            string query =  $"g.V('{directorId}')"+
+             if(!DirectionExists(movieId, directorId))
+             {
+                string query =  $"g.V('{movieId}')"+
                     $".addE('directedBy')"+
-                    $".to(g.V('{movieId}'))";            
+                    $".to(g.V('{directorId}'))";            
 
-            SendRequest(query);    
+                SendRequest(query); 
+            }
+               
         }
 
         public void InsertProduction(int movieId, string countryCode)
         {
-            string query =  $"g.V('{countryCode}')"+
-                    $".addE('producedIn')"+
-                    $".to(g.V('{movieId}'))";            
 
-            SendRequest(query);  
+             if(!ProductionExists(movieId, countryCode))
+             {
+                string query =  $"g.V('{movieId}')"+
+                    $".addE('producedIn')"+
+                    $".to(g.V('{countryCode}'))";            
+
+                SendRequest(query);  
+             }
+            
         }
 
         public void InsertClassification(int movieId, int genreId)
         {
-            string query =  $"g.V('{genreId}')"+
+            if(!ClassificationExists(movieId, genreId))
+            {
+                string query =  $"g.V('{movieId}')"+
                     $".addE('classification')"+
-                    $".to(g.V('{movieId}'))";            
+                    $".to(g.V('{genreId}'))";            
 
-            SendRequest(query); 
+                SendRequest(query); 
+            }
+            
         }
-
 
         public void Clean()
         {
@@ -164,7 +183,7 @@ namespace Movies;
 
         private void InsertPerson(Person cast, string type)
         {
-            if(!PersonExists(cast.Id))
+            if(!PersonExists(cast.Id, type))
             {
                 string query =  $"g.addV('{type}')"+
                                 $".property('id', '{cast.Id}')" + 
@@ -176,10 +195,9 @@ namespace Movies;
             }            
         }
 
-        private bool PersonExists(int id)
+        private bool PersonExists(int id, string type)
         {
-            var query = $"g.V().hasLabel('cast').has('id', '{id}')";
-            
+            var query = $"g.V().hasLabel('{type}').has('id', '{id}')";            
             Console.WriteLine(String.Format("Running this query: {0}", query));
             var resultSet = SubmitRequest(gremlinClient, query).Result;
             return (resultSet.Count > 0);
@@ -203,6 +221,65 @@ namespace Movies;
             Console.WriteLine(String.Format("Running this query: {0}", query));
             var resultSet = SubmitRequest(gremlinClient, query).Result;
             return (resultSet.Count > 0);
+        }
+
+        private bool MovieExists(int movieId)
+        {
+            var query = $"g.V().hasLabel('movie').has('id', '{movieId}')";
+            
+            Console.WriteLine(String.Format("Running this query: {0}", query));
+            var resultSet = SubmitRequest(gremlinClient, query).Result;
+            return (resultSet.Count > 0);
+        }
+
+        private bool DirectionExists(int movieId, int directorId)
+        {
+            string label = "directedBy";
+            
+            string queryEdge = $"g.V('{movieId}').outE('{label}').V('{directorId}')";         
+            Console.WriteLine(String.Format("Running this query: {0}", queryEdge));
+            var resultSet = SubmitRequest(gremlinClient, queryEdge).Result;
+            return (resultSet.Count > 0);            
+
+        }
+
+        private bool InterpretationExists (int movieId, int personId)
+        {
+            string label = "plays";
+            
+            string queryEdge = $"g.V('{personId}').outE('{label}').V('{movieId}')";         
+            Console.WriteLine(String.Format("Running this query: {0}", queryEdge));
+            var resultSet = SubmitRequest(gremlinClient, queryEdge).Result;
+            return (resultSet.Count > 0);     
+
+        }
+        
+        private bool ClassificationExists(int movieId, int genreId)
+        {
+            
+            string label = "classification";
+            
+            string queryEdge = $"g.V('{movieId}').outE('{label}').V('{genreId}')";         
+            Console.WriteLine(String.Format("Running this query: {0}", queryEdge));
+            var resultSet = SubmitRequest(gremlinClient, queryEdge).Result;
+            return (resultSet.Count > 0);   
+
+        }
+
+        private bool ProductionExists(int movieId, string countryCode)
+        {
+            string label = "producedIn";
+            
+            string queryEdge = $"g.V('{movieId}').outE('{label}').V('{countryCode}')";         
+            Console.WriteLine(String.Format("Running this query: {0}", queryEdge));
+            var resultSet = SubmitRequest(gremlinClient, queryEdge).Result;
+            return (resultSet.Count > 0); 
+
+        }
+        
+        private bool EdgeExist(string inV, int outV, string label)
+        {
+            return true;
         }
 
 
