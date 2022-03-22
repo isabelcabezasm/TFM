@@ -11,61 +11,76 @@ class Program
 
         // connector.Clean();
 
-        var movies = await TMDbclient.GetTopPopularMoviesByYearAsync(2021, 10);
+        var movies = await TMDbclient.GetTopPopularMoviesByYearAsync(2021, 1000);
         foreach (var m in movies)
         {
-
-            var movie = await TMDbclient.GetMovieWithCastByIdAsync(m.Id);                  
-            printMovie(movie);
-            connector.InsertMovie(movie);
-        
-            
-            // Directors
-            var directors = TMDbclient.GetDirectorsFromMovie(movie);
-            foreach(var director in directors)
+            try
             {
-                connector.InsertDirector(director);
-                connector.InsertDirection(movie.Id, director.Id);
-            }
-
-            //Countries
-            var productionCountries = TMDbclient.GetProductionCountriesFromMovie(movie);
-            foreach(var country in productionCountries)
-            {
-                connector.InsertCountry(country);
-                connector.InsertProduction(movie.Id, country.Code);
-            }
-
-            //Genres
-            var movieGenres = TMDbclient.GetGenresFromMovie(movie);
-            foreach(var genre in movieGenres)
-            {
-                connector.InsertGenre(genre);
-                connector.InsertClassification(movie.Id, genre.Id);
-            }
-
-
-            for (int i = 0; i <10; i++)
-            {
-                Cast cast = movie.Credits.Cast[i];
-
-                // espera 5 segundos para no reventar la API de tmdb
-                Thread.Sleep(5000); //will sleep for 5 sec
-
-                var person = await TMDbclient.GetCastByIdAsync(cast.Id);                
-
-                if(movie.ReleaseDate != null && person.Birthday != null)
+                if(connector.MovieExists(m.Id))
                 {
-                    connector.InsertCast(person);
-                    Character character = new Character(movie.Id, 
-                                                    cast.Id, 
-                                                    movie.ReleaseDate!.Value.Year, 
-                                                    person.Birthday!.Value.Year, 
-                                                    cast.Character, i);
+                    continue;
+                }
                 
-                    connector.InsertInterpretation(character);
-                }  
+                var movie = await TMDbclient.GetMovieWithCastByIdAsync(m.Id);                  
+                printMovie(movie);
+                connector.InsertMovie(movie);
+            
+                
+                // Directors
+                var directors = TMDbclient.GetDirectorsFromMovie(movie);
+                foreach(var director in directors)
+                {
+                    connector.InsertDirector(director);
+                    connector.InsertDirection(movie.Id, director.Id);
+                }
+
+                //Countries
+                var productionCountries = TMDbclient.GetProductionCountriesFromMovie(movie);
+                foreach(var country in productionCountries)
+                {
+                    connector.InsertCountry(country);
+                    connector.InsertProduction(movie.Id, country.Code);
+                }
+
+                //Genres
+                var movieGenres = TMDbclient.GetGenresFromMovie(movie);
+                foreach(var genre in movieGenres)
+                {
+                    connector.InsertGenre(genre);
+                    connector.InsertClassification(movie.Id, genre.Id);
+                }
+
+
+                for (int i = 0; i <10; i++)
+                {
+                    Cast cast = movie.Credits.Cast[i];
+
+                    // espera 5 segundos para no reventar la API de tmdb
+                    Thread.Sleep(5000); //will sleep for 5 sec
+
+                    var person = await TMDbclient.GetCastByIdAsync(cast.Id);                
+
+                    if(movie.ReleaseDate != null && person.Birthday != null)
+                    {
+                        connector.InsertCast(person);
+                        Character character = new Character(movie.Id, 
+                                                        cast.Id, 
+                                                        movie.ReleaseDate!.Value.Year, 
+                                                        person.Birthday!.Value.Year, 
+                                                        cast.Character, i);
+                    
+                        connector.InsertInterpretation(character);
+                    }  
+                }
+
             }
+            catch(Exception ex)
+            {
+                Console.WriteLine("Error!!!!!! Película: " + m.Id);
+                Console.WriteLine(ex.Message);
+            }
+
+            
         }
     }
 

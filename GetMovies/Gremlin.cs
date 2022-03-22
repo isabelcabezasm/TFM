@@ -179,6 +179,14 @@ namespace Movies;
             SendRequest(query);
         }
 
+        public bool MovieExists(int movieId)
+        {
+            var query = $"g.V().hasLabel('movie').has('id', '{movieId}')";
+            
+            Console.WriteLine(String.Format("Running this query: {0}", query));
+            var resultSet = SubmitRequest(gremlinClient, query).Result;
+            return (resultSet.Count > 0);
+        }
 
 
         private void InsertPerson(Person cast, string type)
@@ -197,7 +205,7 @@ namespace Movies;
 
         private bool PersonExists(int id, string type)
         {
-            var query = $"g.V().hasLabel('{type}').has('id', '{id}')";            
+            var query = $"g.V().has('id', '{id}')";            
             Console.WriteLine(String.Format("Running this query: {0}", query));
             var resultSet = SubmitRequest(gremlinClient, query).Result;
             return (resultSet.Count > 0);
@@ -223,14 +231,7 @@ namespace Movies;
             return (resultSet.Count > 0);
         }
 
-        private bool MovieExists(int movieId)
-        {
-            var query = $"g.V().hasLabel('movie').has('id', '{movieId}')";
-            
-            Console.WriteLine(String.Format("Running this query: {0}", query));
-            var resultSet = SubmitRequest(gremlinClient, query).Result;
-            return (resultSet.Count > 0);
-        }
+
 
         private bool DirectionExists(int movieId, int directorId)
         {
