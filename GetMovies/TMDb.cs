@@ -57,26 +57,63 @@ public class TMDb
     {
         var directorCrew = movie.Credits.Crew.Where(c => c.Job =="Director" && c.Department == "Directing");
         var directors = GetPeopleFromCrew(directorCrew);
+        foreach(var dir in directors)
+        {
+            dir.Name = dir.Name.Replace("'", "\\'");
+        }
         return directors;
 
     }
 
-    private List<Person> GetPeopleFromCrew(IEnumerable<Crew> directorCrew)
+    /*
+    *   Returns  movies.
+    *   Ordered by Popular, return the movies with index between beginIndex and endIndex
+    */
+    public async Task<List<Movie>> GetTopPopularMoviesByYearAsync(int year, int beginIndex, int endIndex)
     {
-        List<Person> directores = new List<Person>();
-        foreach (var d in directorCrew)
+        List<Movie> movies = new List<Movie>();
+
+        int page = 1;
+        int totalPages = 0;
+        int index = 1;
+        bool cancel = false;
+        do
         {
-            Person director = new Person();
-            director.Name = d.Name;
-            director.Id = d.Id;
-            director.Gender = d.Gender;
+            var dMovie = await client.DiscoverMoviesAsync()
+                                .WherePrimaryReleaseDateIsAfter(new DateTime(year, 01, 01))
+                                .WherePrimaryReleaseDateIsBefore(new DateTime(year+1, 01, 01))
+                                .OrderBy(DiscoverMovieSortBy.VoteCountDesc)
+                                .Query(page: page);
 
-            directores.Add(director);
-        }
+            totalPages = dMovie.TotalPages;
 
-        return directores;
+            foreach (var movie in dMovie.Results)
+            {
+                if (index < endIndex && index > beginIndex)
+                {
+                    movies.Add(GetMovieFromSearchMovie(movie));                         
+                    if(++index > endIndex) 
+                    {
+                        cancel = true;
+                        break;                    
+                    } 
+
+                }
+                else
+                {
+                    index++;
+                }
+                
+            }    
+
+            page++;
+            cancel = (index > endIndex);
+
+        } while(page <= totalPages && !cancel);              
+     
+        return movies;
+
     }
-
     public async Task<List<Movie>> GetTopPopularMoviesByYearAsync(int year, int numMovies)
     {   
         List<Movie> movies = new List<Movie>();
@@ -111,6 +148,21 @@ public class TMDb
         } while(page <= totalPages && !cancel);              
      
         return movies;
+    }
+    private List<Person> GetPeopleFromCrew(IEnumerable<Crew> directorCrew)
+    {
+        List<Person> directores = new List<Person>();
+        foreach (var d in directorCrew)
+        {
+            Person director = new Person();
+            director.Name = d.Name;
+            director.Id = d.Id;
+            director.Gender = d.Gender;
+
+            directores.Add(director);
+        }
+
+        return directores;
     }
 
     private Movie GetMovieFromSearchMovie (SearchMovie searchmovie)

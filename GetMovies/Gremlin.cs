@@ -200,7 +200,11 @@ namespace Movies;
                                 $".property('pk', 'pk')" ;
             
                 SendRequest(query);
-            }            
+            }  
+            else
+            {
+                Console.WriteLine($"{cast.Name} already exists.");
+            }          
         }
 
         private bool PersonExists(int id, string type)
@@ -248,7 +252,8 @@ namespace Movies;
         {
             string label = "plays";
             
-            string queryEdge = $"g.V('{personId}').outE('{label}').V('{movieId}')";         
+            string queryEdge = $"g.V('{movieId}').inE('{label}').outV().hasId('{personId}')";
+
             Console.WriteLine(String.Format("Running this query: {0}", queryEdge));
             var resultSet = SubmitRequest(gremlinClient, queryEdge).Result;
             return (resultSet.Count > 0);     

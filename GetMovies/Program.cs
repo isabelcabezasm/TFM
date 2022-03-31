@@ -11,18 +11,22 @@ class Program
 
         // connector.Clean();
 
-        var movies = await TMDbclient.GetTopPopularMoviesByYearAsync(2021, 1000);
+        var movies = await TMDbclient.GetTopPopularMoviesByYearAsync(2019, 300);
+        int index =0; 
+
         foreach (var m in movies)
         {
+            index++;
             try
             {
                 if(connector.MovieExists(m.Id))
                 {
+                    Console.WriteLine($"Movie: {m.Id} {m.Title} already exists");
                     continue;
                 }
-                
+
                 var movie = await TMDbclient.GetMovieWithCastByIdAsync(m.Id);                  
-                printMovie(movie);
+                printMovie(index, movie);
                 connector.InsertMovie(movie);
             
                 
@@ -51,12 +55,12 @@ class Program
                 }
 
 
-                for (int i = 0; i <10; i++)
+                for (int i = 0; i <10 && i < movie.Credits.Cast.Count; i++)
                 {
                     Cast cast = movie.Credits.Cast[i];
 
                     // espera 5 segundos para no reventar la API de tmdb
-                    Thread.Sleep(5000); //will sleep for 5 sec
+                    Thread.Sleep(1000); //will sleep for 5 sec
 
                     var person = await TMDbclient.GetCastByIdAsync(cast.Id);                
 
@@ -76,7 +80,7 @@ class Program
             }
             catch(Exception ex)
             {
-                Console.WriteLine("Error!!!!!! Película: " + m.Id);
+                Console.WriteLine("Error!!!!!! Película: "+m.Id);
                 Console.WriteLine(ex.Message);
             }
 
@@ -84,8 +88,8 @@ class Program
         }
     }
 
-    private static void printMovie(Movie movie) =>
-        Console.WriteLine($"Movie: {movie.Id} - {movie.Title}, ({movie.ReleaseDate!.Value.Year}), {movie.VoteCount} " +
+    private static void printMovie(int index, Movie movie) =>
+        Console.WriteLine($"{index} Movie: {movie.Id} - {movie.Title}, ({movie.ReleaseDate!.Value.Year}), {movie.VoteCount} " +
         $"\nOverview: {movie.Overview}");      
 
     private static void printMovieWithCast(Movie movie) =>
