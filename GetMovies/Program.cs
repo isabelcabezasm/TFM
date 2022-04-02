@@ -5,28 +5,35 @@ namespace Movies;
 class Program
 {
     static async Task Main(string[] args)
+    {      
+
+        await readAndWriteMoviesAsync(2009, 300);
+
+        // connector.Clean();
+    }
+
+    private static async Task readAndWriteMoviesAsync(int year, int num)
     {
         TMDb TMDbclient = new TMDb();
         Gremlin connector = new Gremlin();
 
-        // connector.Clean();
-
-        var movies = await TMDbclient.GetTopPopularMoviesByYearAsync(2019, 300);
+        var movies = await TMDbclient.GetTopPopularMoviesByYearAsync(year, num);
         int index =0; 
 
         foreach (var m in movies)
         {
             index++;
+            Console.Write(index + " ");
             try
             {
                 if(connector.MovieExists(m.Id))
                 {
-                    Console.WriteLine($"Movie: {m.Id} {m.Title} already exists");
+                    printWarning($"Movie: {m.Id} {m.Title} already exists");
                     continue;
                 }
 
                 var movie = await TMDbclient.GetMovieWithCastByIdAsync(m.Id);                  
-                printMovie(index, movie);
+                // printMovie(index, movie);
                 connector.InsertMovie(movie);
             
                 
@@ -80,12 +87,13 @@ class Program
             }
             catch(Exception ex)
             {
-                Console.WriteLine("Error!!!!!! Película: "+m.Id);
-                Console.WriteLine(ex.Message);
+                printError(ex.Message, m.Id);
             }
 
             
         }
+
+
     }
 
     private static void printMovie(int index, Movie movie) =>
@@ -106,5 +114,23 @@ class Program
             Console.WriteLine($"Popularity: {movie.Popularity}, Num Votes: {movie.VoteCount}, Vote Avg:: {movie.VoteAverage}  ");
         }
     }
+
+    private static void printError(String message, int movieId)
+    {
+        var foregroundColor= Console.ForegroundColor;
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine("Error!!!!!! Película: " + movieId);
+        Console.WriteLine(message);
+        Console.ForegroundColor = foregroundColor;
+    }
+
+    private static void printWarning(String message)
+    {
+        var foregroundColor= Console.ForegroundColor;
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.WriteLine(message);
+        Console.ForegroundColor = foregroundColor;
+    }
+
 
 }
