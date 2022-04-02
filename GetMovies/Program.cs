@@ -23,7 +23,7 @@ class Program
         foreach (var m in movies)
         {
             index++;
-            Console.Write(index + " ");
+            Console.WriteLine(index);
             try
             {
                 if(connector.MovieExists(m.Id))

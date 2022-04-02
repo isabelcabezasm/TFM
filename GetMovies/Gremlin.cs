@@ -15,7 +15,6 @@ namespace Movies;
         
         private static string Host => Environment.GetEnvironmentVariable("Host") ?? throw new ArgumentException("Missing env var: Host");
 
-
         private static string PrimaryKey => Environment.GetEnvironmentVariable("PrimaryKey") ?? throw new ArgumentException("Missing env var: PrimaryKey");
         private static string Database => Environment.GetEnvironmentVariable("DatabaseName") ?? throw new ArgumentException("Missing env var: DatabaseName");
 
@@ -67,6 +66,13 @@ namespace Movies;
         {
             if(!MovieExists(movie.Id))
             {
+                if(NodeExists(movie.Id))
+                {                    
+                    String id = movie.Id.ToString() + "000";                    
+                    movie.Id = int.Parse(id);
+                    Console.WriteLine(movie.Id);
+                }
+
                 string query =  $"g.addV('movie')"+
                                     $".property('id', '{movie.Id}')" + 
                                     $".property('title', '{movie.Title}')"+
@@ -188,6 +194,14 @@ namespace Movies;
             return (resultSet.Count > 0);
         }
 
+        public bool NodeExists(int id)
+        {
+            var query = $"g.V().has('id', '{id}')";
+            
+            // Console.WriteLine(String.Format("Running this query: {0}", query));
+            var resultSet = SubmitRequest(gremlinClient, query).Result;
+            return (resultSet.Count > 0);
+        }
 
         private void InsertPerson(Person cast, string type)
         {
