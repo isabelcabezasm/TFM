@@ -183,7 +183,7 @@ namespace Movies;
         {
             var query = $"g.V().hasLabel('movie').has('id', '{movieId}')";
             
-            Console.WriteLine(String.Format("Running this query: {0}", query));
+            // Console.WriteLine(String.Format("Running this query: {0}", query));
             var resultSet = SubmitRequest(gremlinClient, query).Result;
             return (resultSet.Count > 0);
         }
@@ -203,14 +203,14 @@ namespace Movies;
             }  
             else
             {
-                Console.WriteLine($"{cast.Name} already exists.");
+                // Console.WriteLine($"{cast.Name} already exists.");
             }          
         }
 
         private bool PersonExists(int id, string type)
         {
             var query = $"g.V().has('id', '{id}')";            
-            Console.WriteLine(String.Format("Running this query: {0}", query));
+            // Console.WriteLine(String.Format("Running this query: {0}", query));
             var resultSet = SubmitRequest(gremlinClient, query).Result;
             return (resultSet.Count > 0);
             
@@ -220,7 +220,7 @@ namespace Movies;
         {
             var query = $"g.V().hasLabel('country').has('id', '{countryCode}')";
             
-            Console.WriteLine(String.Format("Running this query: {0}", query));
+            // Console.WriteLine(String.Format("Running this query: {0}", query));
             var resultSet = SubmitRequest(gremlinClient, query).Result;
             return (resultSet.Count > 0);
             
@@ -230,7 +230,7 @@ namespace Movies;
         {
             var query = $"g.V().hasLabel('genre').has('id', '{genreId}')";
             
-            Console.WriteLine(String.Format("Running this query: {0}", query));
+            // Console.WriteLine(String.Format("Running this query: {0}", query));
             var resultSet = SubmitRequest(gremlinClient, query).Result;
             return (resultSet.Count > 0);
         }
@@ -242,7 +242,7 @@ namespace Movies;
             string label = "directedBy";
             
             string queryEdge = $"g.V('{movieId}').outE('{label}').V('{directorId}')";         
-            Console.WriteLine(String.Format("Running this query: {0}", queryEdge));
+            // Console.WriteLine(String.Format("Running this query: {0}", queryEdge));
             var resultSet = SubmitRequest(gremlinClient, queryEdge).Result;
             return (resultSet.Count > 0);            
 
@@ -254,7 +254,7 @@ namespace Movies;
             
             string queryEdge = $"g.V('{movieId}').inE('{label}').outV().hasId('{personId}')";
 
-            Console.WriteLine(String.Format("Running this query: {0}", queryEdge));
+            // Console.WriteLine(String.Format("Running this query: {0}", queryEdge));
             var resultSet = SubmitRequest(gremlinClient, queryEdge).Result;
             return (resultSet.Count > 0);     
 
@@ -266,7 +266,7 @@ namespace Movies;
             string label = "classification";
             
             string queryEdge = $"g.V('{movieId}').outE('{label}').V('{genreId}')";         
-            Console.WriteLine(String.Format("Running this query: {0}", queryEdge));
+            // Console.WriteLine(String.Format("Running this query: {0}", queryEdge));
             var resultSet = SubmitRequest(gremlinClient, queryEdge).Result;
             return (resultSet.Count > 0);   
 
@@ -277,7 +277,7 @@ namespace Movies;
             string label = "producedIn";
             
             string queryEdge = $"g.V('{movieId}').outE('{label}').V('{countryCode}')";         
-            Console.WriteLine(String.Format("Running this query: {0}", queryEdge));
+            // Console.WriteLine(String.Format("Running this query: {0}", queryEdge));
             var resultSet = SubmitRequest(gremlinClient, queryEdge).Result;
             return (resultSet.Count > 0); 
 
@@ -291,18 +291,18 @@ namespace Movies;
 
         private void SendRequest(String query)
         {
-            Console.WriteLine(String.Format("Running this query: {0}", query));
+            // Console.WriteLine(String.Format("Running this query: {0}", query));
             var resultSet = SubmitRequest(gremlinClient, query).Result;
             if (resultSet.Count > 0)
             {
-                Console.WriteLine("\tResult:");
+                // Console.WriteLine("\tResult:");
                 foreach (var result in resultSet)
                 {
                     // The vertex results are formed as Dictionaries with a nested dictionary for their properties
                     string output = JsonConvert.SerializeObject(result);
-                    Console.WriteLine($"\t{output}");
+                    // Console.WriteLine($"\t{output}");
                 }
-                Console.WriteLine();
+                // Console.WriteLine();
             }
 
         }
@@ -319,20 +319,20 @@ namespace Movies;
                 // <executeQueries>
                 foreach (var query in gremlinQueries)
                 {
-                    Console.WriteLine(String.Format("Running this query: {0}: {1}", query.Key, query.Value));
+                    // Console.WriteLine(String.Format("Running this query: {0}: {1}", query.Key, query.Value));
 
                     // Create async task to execute the Gremlin query.
                     var resultSet = SubmitRequest(gremlinClient, query).Result;
                     if (resultSet.Count > 0)
                     {
-                        Console.WriteLine("\tResult:");
+                        // Console.WriteLine("\tResult:");
                         foreach (var result in resultSet)
                         {
                             // The vertex results are formed as Dictionaries with a nested dictionary for their properties
                             string output = JsonConvert.SerializeObject(result);
-                            Console.WriteLine($"\t{output}");
+                            // Console.WriteLine($"\t{output}");
                         }
-                        Console.WriteLine();
+                        // Console.WriteLine();
                     }
 
                     // Print the status attributes for the result set.
@@ -341,7 +341,7 @@ namespace Movies;
                     //  x-ms-total-request-charge   : The total request units charged for processing a request.
                     //  x-ms-total-server-time-ms   : The total time executing processing the request on the server.
                     PrintStatusAttributes(resultSet.StatusAttributes);
-                    Console.WriteLine();
+                    // Console.WriteLine();
                 }
 
 
