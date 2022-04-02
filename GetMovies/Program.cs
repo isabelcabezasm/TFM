@@ -9,24 +9,26 @@ class Program
         TMDb TMDbclient = new TMDb();
         Gremlin connector = new Gremlin();
 
-        // connector.Clean();
 
-        var movies = await TMDbclient.GetTopPopularMoviesByYearAsync(2019, 300);
+        // connector.Clean();
+        int[] moviesIdError = new int[] {131631, 864873, 672741, 664300, 603661, 785457, 747688 }; //done
+        // var movies = await TMDbclient.GetTopPopularMoviesByYearAsync(2019, 300);
         int index =0; 
 
-        foreach (var m in movies)
+        foreach (var m in moviesIdError)
         {
             index++;
+            Console.WriteLine(index + " - " + m.ToString() );
             try
             {
-                if(connector.MovieExists(m.Id))
+                if(connector.MovieExists(m))
                 {
-                    Console.WriteLine($"Movie: {m.Id} {m.Title} already exists");
+                    Console.WriteLine($"Movie: {m} already exists");
                     continue;
                 }
 
-                var movie = await TMDbclient.GetMovieWithCastByIdAsync(m.Id);                  
-                printMovie(index, movie);
+                var movie = await TMDbclient.GetMovieWithCastByIdAsync(m);                  
+                // printMovie(index, movie);
                 connector.InsertMovie(movie);
             
                 
@@ -80,7 +82,7 @@ class Program
             }
             catch(Exception ex)
             {
-                Console.WriteLine("Error!!!!!! Película: "+m.Id);
+                Console.WriteLine("Error!!!!!! Película: "+m);
                 Console.WriteLine(ex.Message);
             }
 
