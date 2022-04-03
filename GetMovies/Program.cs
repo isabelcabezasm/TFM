@@ -7,12 +7,17 @@ class Program
     static async Task Main(string[] args)
     {      
 
-        await readAndWriteMoviesAsync(2009, 300);
+        List<int> moviesWithError = new List<int>();
+
+        await readAndWriteMoviesAsync(2000, 300, moviesWithError);
+
+        Console.WriteLine("Movies with error!! :");
+        Console.WriteLine(string.Join(", ", moviesWithError));
 
         // connector.Clean();
     }
 
-    private static async Task readAndWriteMoviesAsync(int year, int num)
+    private static async Task readAndWriteMoviesAsync(int year, int num, List<int> moviesError)
     {
         TMDb TMDbclient = new TMDb();
         Gremlin connector = new Gremlin();
@@ -23,7 +28,7 @@ class Program
         foreach (var m in movies)
         {
             index++;
-            Console.WriteLine(index);
+            Console.WriteLine(year + " - " + index);
             try
             {
                 if(connector.MovieExists(m.Id))
@@ -87,6 +92,7 @@ class Program
             }
             catch(Exception ex)
             {
+                moviesError.Add(m.Id);
                 printError(ex.Message, m.Id);
             }
 
