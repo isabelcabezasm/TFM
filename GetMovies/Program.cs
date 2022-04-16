@@ -7,12 +7,26 @@ class Program
     static async Task Main(string[] args)
     {      
 
+        var watch = new System.Diagnostics.Stopwatch();
+            
+        watch.Start();
+
         List<int> moviesWithError = new List<int>();
 
-        await readAndWriteMoviesAsync(2000, 300, moviesWithError);
+        for (int year = 1970; year<=1979; year++)
+        {
+            await readAndWriteMoviesAsync(year, 300, moviesWithError);
+        }
+        
 
         Console.WriteLine("Movies with error!! :");
         Console.WriteLine(string.Join(", ", moviesWithError));
+
+        watch.Stop();
+
+        double time = watch.ElapsedMilliseconds/60000;
+
+        Console.WriteLine($"Execution Time: {time} min");
 
         // connector.Clean();
     }
