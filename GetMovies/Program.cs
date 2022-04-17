@@ -13,7 +13,7 @@ class Program
         Film peli = new Film();
         if (peli != null)
         {
-            for(int year = 2021; year >= 2000; year--)
+            for(int year = 2000; year >= 1970; year--)
             {
                 var movies = await peli.getMoviesDTO(year, 300);
                 string json = JsonSerializer.Serialize<List<MovieDTO>>(movies);
