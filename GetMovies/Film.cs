@@ -13,13 +13,14 @@ public class Film
         List<MovieDTO> moviesData = new List<MovieDTO>();
 
         var movies = await TMDbclient.GetTopPopularMoviesByYearAsync(year, num);
+
         foreach (var m in movies)
         {
             var movie = await TMDbclient.GetMovieWithCastByIdAsync(m.Id);
             
             // Characters' list
              List<Character> characters = new List<Character>();
-            for (int i = 0; i <10 && i < movie.Credits.Cast.Count; i++)
+            for (int i = 0; i < 4 && i < movie.Credits.Cast.Count; i++)
             {
                     Cast cast = movie.Credits.Cast[i];
                     var person = await TMDbclient.GetCastByIdAsync(cast.Id);
@@ -37,11 +38,8 @@ public class Film
             moviesData.Add(mdto);
         }
 
-
         return moviesData;
-
     }
-
 
 
     public async Task readAndWriteMoviesAsync(int year, int num)
