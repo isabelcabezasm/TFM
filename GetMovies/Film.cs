@@ -28,7 +28,8 @@ public class Film
                     Character character = new Character(movie.Id, 
                                                         cast.Id, 
                                                         cast.Name,                                                          
-                                                        cast.Character);                            
+                                                        cast.Character,
+                                                        (Character.PersonSex)cast.Gender);                            
                     
                     characters.Add(character);                    
             }

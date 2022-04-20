@@ -9,6 +9,7 @@ public class Character
     public int? ImportanceLevel { get; set; }
 
     public string? ActorName { get; set; }
+    public PersonSex? Sex  {get ;set; }
 
 
 
@@ -21,12 +22,25 @@ public class Character
         ImportanceLevel = level;
     }
 
-    public Character(int movieId, int actorId, string actorName, string characterName)
+    public Character(int movieId, int actorId, string actorName, string characterName, PersonSex sex)
     {
         MovieId = movieId;
         PersonId = actorId;
         ActorName = actorName;
         CharacterName = characterName;
-
+        Sex = sex;
     }
+
+
+    public enum PersonSex
+    {
+        Unknown = 0,
+        Female = 1,
+        Male = 2,
+        NonBinary = 3
+    }
+
 }
+
+
+
