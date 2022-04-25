@@ -1,5 +1,4 @@
-
-namespace Movies;
+namespace MovieAnalyzer.Models;
 
 public class ProductionCountry
 {
