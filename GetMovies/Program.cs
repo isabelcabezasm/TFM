@@ -18,7 +18,7 @@ class Program
         {
             Console.WriteLine("You have chosen option 1");
             var movieetl = new MovieETL();
-            await movieetl.ReadAndWriteMoviesAsync(1970, 3);
+            await movieetl.ReadAndWriteMoviesAsync(1970, 300);
         }
         else if (option == 2)
         {

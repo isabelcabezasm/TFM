@@ -25,7 +25,7 @@ public class MovieETL
         foreach (var m in movies)
         {
             index++;
-            Console.WriteLine(index);
+            Console.WriteLine(year + " - " + index);
             try
             {
                 if(connector.MovieExists(m.MovieId))
@@ -80,31 +80,6 @@ public class MovieETL
                         }
                     }
                 }
-                
-
-
-                // for (int i = 0; i <10 && i < movie.Credits.Cast.Count; i++)
-                // {
-                //     var cast = movie.Credits.Cast[i];
-
-                //     // espera 5 segundos para no reventar la API de tmdb
-                //     Thread.Sleep(1000); //will sleep for 5 sec
-
-                //     var person = await tmdbclient.GetCastByIdAsync(cast.Id);                
-
-                //     if(movie.ReleaseDate != null && person.Birthday != null)
-                //     {
-                //         connector.InsertCast(person);
-                //         MovieAnalyzer.Models.Character character = new Character(movie.Id, 
-                //                                         cast.Id, 
-                //                                         movie.ReleaseDate!.Value.Year, 
-                //                                         person.Birthday!.Value.Year, 
-                //                                         cast.Character, i);
-                    
-                //         connector.InsertInterpretation(character);
-                //     }  
-                // }
-
             }
             catch(Exception ex)
             {

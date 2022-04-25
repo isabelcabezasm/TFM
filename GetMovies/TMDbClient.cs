@@ -263,7 +263,7 @@ public class TMDbClient
         foreach (var d in directorCrew)
         {
             MovieAnalyzer.Models.Person director = new MovieAnalyzer.Models.Person(d.Id.ToString()+"p", 
-                                                                                   d.Name,
+                                                                                   d.Name.Replace("'", "\\'"),
                                                                                    (PersonGender)d.Gender);   
 
             directores.Add(director);
