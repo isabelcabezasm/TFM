@@ -14,9 +14,9 @@ class Program
         Film peli = new Film();
         if (peli != null)
         {
-            for(int year = 2000; year >= 2000; year--)
+            for(int year = 2021; year >= 1970; year--)
             {
-                var movies = await peli.getMoviesDTO(year, 3);
+                var movies = await peli.getMoviesDTO(year, 300);
 
                 // save as CSV file: 
                 using var fs = new StreamWriter($"movies_{year}.csv");
