@@ -16,9 +16,23 @@ class Program
 
         if( option == 1)
         {
+
             Console.WriteLine("You have chosen option 1");
+
+            var moviesWithError = new List<string>();
             var movieetl = new MovieETL();
-            await movieetl.ReadAndWriteMoviesAsync(1970, 300);
+
+            var watch = new System.Diagnostics.Stopwatch();            
+            watch.Start();
+
+            await movieetl.ReadAndWriteMoviesAsync(1970, 300, moviesWithError);
+            Console.WriteLine("Movies with error!! :");
+            Console.WriteLine(string.Join(", ", moviesWithError));
+            watch.Stop();
+            double time = watch.ElapsedMilliseconds/60000;
+            Console.WriteLine($"Execution Time: {time} min");
+
+
         }
         else if (option == 2)
         {

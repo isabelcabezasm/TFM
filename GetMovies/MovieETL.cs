@@ -16,7 +16,7 @@ public class MovieETL
 
 
 
-    public async Task ReadAndWriteMoviesAsync(int year, int num)
+    public async Task ReadAndWriteMoviesAsync(int year, int num, List<string> moviesError)
     {       
 
         var movies = await tmdbclient.GetTopPopularMoviesByYearAsync(year, num);
@@ -83,6 +83,7 @@ public class MovieETL
             }
             catch(Exception ex)
             {
+                moviesError.Add(m.MovieId);
                 printError(ex.Message, m.MovieId);
             }
 
