@@ -68,12 +68,16 @@ public class MovieETL
                     }
                 }
 
+                // Insert Characters and Actors
                 if(movie.Characters != null)
                 {
                     foreach(var character in movie.Characters)
                     {
-                        // connector.InsertCast(character);
-                        // connector.InsertInterpretation(character);
+                        if (character.Actor != null)
+                        {
+                            connector.InsertCast(character.Actor);
+                            connector.InsertInterpretation(character);
+                        }
                     }
                 }
                 

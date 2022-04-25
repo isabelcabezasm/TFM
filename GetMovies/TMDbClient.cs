@@ -198,10 +198,6 @@ public class TMDbClient
     }
 
 
-
-
-
-
     private List<MovieAnalyzer.Models.ProductionCountry> GetProductionCountriesFromMovie(Movie movie)
     {
         var countries = new List<MovieAnalyzer.Models.ProductionCountry>();
@@ -240,10 +236,11 @@ public class TMDbClient
                                                     cast.Id.ToString()+"p", 
                                                     movie.ReleaseDate!.Value.Year, 
                                                     person.BirthYear?? 0, 
-                                                    cast.Character, 
+                                                    cast.Character.Replace("'", "\\'"), 
                                                     cast.Name,
                                                     (PersonGender)cast.Gender,
-                                                    i);
+                                                    i, 
+                                                    person);
             
                 characters.Add(character);
             }  

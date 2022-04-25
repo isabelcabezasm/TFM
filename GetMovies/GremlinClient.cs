@@ -141,7 +141,8 @@ public class GremlinClient
                             $".addE('plays')"+
                             $".to(g.V('{character.MovieId}'))"+
                             $".property('importance_level', {character.ImportanceLevel})" +
-                            $".property('age', {character.Age})";            
+                            $".property('age', {character.Age})" +
+                            $".property('character_name', '{character.CharacterName}')";
 
             SendRequest(query);    
             }                   
@@ -303,6 +304,11 @@ public class GremlinClient
 
     }       
 
+
+
+
+
+    // Gremlin Implementation details
     private void SendRequest(String query)
     {
         // Console.WriteLine(String.Format("Running this query: {0}", query));

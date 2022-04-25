@@ -11,9 +11,11 @@ public class Character
     public string? ActorName { get; set; }
     public PersonGender? Gender  {get ;set; }
 
+    public Person? Actor {get ;set; }
 
 
-    public Character(string movieId, string actorId, int releaseYear, int birthYear, string characterName, string actorname, PersonGender gender, int level)
+
+    public Character(string movieId, string actorId, int releaseYear, int birthYear, string characterName, string actorname, PersonGender gender, int level, Person actor)
     {
         MovieId = movieId;
         PersonId = actorId;
@@ -22,6 +24,7 @@ public class Character
         ImportanceLevel = level;
         ActorName = actorname;
         Gender = gender;
+        Actor = actor;
     }
 
     public Character(string movieId, string actorId, string actorName, string characterName, PersonGender gender)
