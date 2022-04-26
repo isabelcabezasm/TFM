@@ -43,7 +43,6 @@ class Program
         {
             Console.WriteLine("You have chosen option 3");
             MovieRoles roles = new MovieRoles();
-            roles.OpenFile();
         }
         else 
         {

@@ -12,6 +12,38 @@ public class MovieCSV
     //    getMoviesAsync().Wait();
     }
 
+     
+
+    public List<CSVRow> OpenCSVFileToRead(string path)
+    {        
+        //Open file
+        using var streamReader = File.OpenText(path);
+        using var csvReader = new CsvReader(streamReader, GetCsvConfiguration());
+        var filerows = csvReader.GetRecords<CSVRow>();
+
+        //load rows into a list
+        List<CSVRow> rows = new List<CSVRow>();
+        foreach(var row in filerows)
+        {
+            rows.Add(row);
+        }
+
+        return rows;
+    }
+
+     private static CsvConfiguration GetCsvConfiguration()
+    {
+        var csvConfig = new CsvConfiguration(CultureInfo.CurrentCulture)
+        {
+            HasHeaderRecord = true,
+            Comment = '#',
+            AllowComments = true,
+            Delimiter = ",",
+        };
+        return csvConfig;
+    }
+
+
     //     public async Task<List<MovieAnalyzer.Models.Movie>> getMoviesDTO(int year, int num)
     // {
     //     List<MovieAnalyzer.Models.Movie> moviesData = new List<MovieAnalyzer.Models.Movie>();
