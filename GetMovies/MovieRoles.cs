@@ -32,7 +32,7 @@ public class MovieRoles
         var filerows = csv.OpenCSVFileToRead<AdjetivesCSVRow>("CSV\\all_adjetives_female.csv");
         foreach (var row in filerows)
         {
-            Console.WriteLine(row.year + " - " + row.movieid + " - " + row.adj + " - " + row.noun);            
+            Console.WriteLine(row.year + " - " + row.movieid + " - " + gclient.GetMovieTitle(row.movieid+ "m") + " -  " + row.adj + " - " + row.noun);            
             gclient.InsertAdjetiveToProtagonist(row.movieid + "m", row.adj, row.noun, PersonGender.Female);
         }
 

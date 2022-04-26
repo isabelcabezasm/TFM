@@ -190,6 +190,9 @@ public class GremlinClient
     {
         string adjetive = "adj";
         string queryEdge = $" g.V().hasId('{actorid}').outE('plays').as('e').inV().hasId('{movieid}').select('e').properties().hasKey('{adjetive}')";
+
+        // TODO: if adjetive doesn't exist
+        
         
         //look for adjetives already includes in the edge
         bool found = false;
@@ -213,44 +216,78 @@ public class GremlinClient
 
     public void InsertAdjetiveToProtagonist(string movieid, string adj, string noun, PersonGender gender)
     {
+        //get most important character of gender "gender"
+        TempCharacter first = GetFirstCharacter(movieid, gender);
+
+        InsertAdjetiveToCharacter(first.movieId, first.actorId, adj);
+        InsertAdjetiveToCharacter(first.movieId, first.actorId, noun);
+
+    }
+
+    //given a movie (movieid) 
+    //returns the first (most important) actor or actress (depending of the parameter gender)
+    private TempCharacter GetFirstCharacter(string movieid, PersonGender gender)
+    {
+        
+        List<TempCharacter> tempCharacters = new List<TempCharacter>();
+        
+        var queryGetCharacters = $"g.V().hasId('{movieid}').inE('plays')";
+        var charactersResultSet = SubmitRequest(gremlinClient, queryGetCharacters).Result;
+
+        foreach(var character in charactersResultSet)
+        {
+            //for each character, take the actor/actress: 
+            var actorId = character["outV"];
+            var edgeId = character["id"];
+            var properties = character["properties"];
+            var importance_level = int.Parse(properties["importance_level"].ToString());
+
+            var queryPerson = $"g.V().hasId('{actorId}')";
+            var personResultSet = SubmitRequest(gremlinClient, queryPerson).Result;
+
+            foreach(var person in personResultSet)
+            {
+                var properties2 = person["properties"]["gender"];
+                foreach(var p in properties2)
+                {
+                    var personGender = p["value"].ToString();
+                    if (personGender == gender.ToString())
+                    {
+                        //save this actor/character
+                        TempCharacter c = new TempCharacter {
+                            movieId = movieid, 
+                            actorId= actorId, 
+                            level = importance_level
+                        };
+                        tempCharacters.Add(c);                        
+                    }
+                }
+            }
+        }
+        var first = tempCharacters.OrderBy(m=>m.level).First();
+
+        return first;
+    }
+
+    public string GetMovieTitle(string movieid)
+    {
+        string title = String.Empty;
         //search movie: 
         var query = $"g.V().hasLabel('movie').has('id', '{movieid}')";
         var resultSet = SubmitRequest(gremlinClient, query).Result;
-        
+                
         foreach(var result in resultSet)
         {
-            string title = String.Empty;
+            
             var properties = result["properties"]["title"]; 
             foreach (var property in properties)
             {
                 title = property["value"].ToString();
-            }
-             //movie title    
-            Console.WriteLine("Movie: " + title + ", Adj: " + adj + ", Noun: " + noun);
+            }         
         }
-
-
-        //a partir de una película, coger la primera actriz en orden de importancia.
-
-        var queryGetCharacters = $"g.V().hasId('{movieid}').inE('plays')";
-        var charactersResultSet = SubmitRequest(gremlinClient, query).Result;
-
-        foreach(var character in charactersResultSet)
-        {
-            //save:
-            // var importance_level
-            // var outV (actorId)
-            // var edgeId
-
-        }
-           
-
-        
-
-  
-
-
+        return title;
     }
+
     public void Clean()
     {
         string query =  $"g.V().drop()";
@@ -466,5 +503,14 @@ public class GremlinClient
 
         return null;
     }
+
+}
+
+
+public class TempCharacter
+{
+    public string movieId = String.Empty;
+    public string actorId = String.Empty;
+    public int level = 0;
 
 }

@@ -13,7 +13,7 @@ class Program
         Console.WriteLine("3. Load adjetives into characters");
         Console.WriteLine("4. Load adjetives into protagonists");
         Console.WriteLine("Other. Exit program");
-        var option = 3; //Console.Read();
+        var option = 4; //Console.Read();
 
         if( option == 1)
         {

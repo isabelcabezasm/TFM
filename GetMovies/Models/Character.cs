@@ -35,9 +35,6 @@ public class Character
         CharacterName = characterName;
         Gender = gender;
     }
-
-
-
 }
 
 
