@@ -1,4 +1,3 @@
-
 using MovieAnalyzer.Models;
 namespace MovieAnalyzer; 
 

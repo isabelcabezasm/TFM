@@ -15,7 +15,8 @@ public class GremlinClient
     private static string PrimaryKey => Environment.GetEnvironmentVariable("PrimaryKey") ?? throw new ArgumentException("Missing env var: PrimaryKey");
     private static string Database => Environment.GetEnvironmentVariable("DatabaseName") ?? throw new ArgumentException("Missing env var: DatabaseName");
 
-    private static string Container => Environment.GetEnvironmentVariable("ContainerName") ?? throw new ArgumentException("Missing env var: ContainerName");        
+    private static string Container => Environment.GetEnvironmentVariable("ContainerName") ?? throw new ArgumentException("Missing env var: ContainerName");
+
     private static int Port => 443;
     private static bool EnableSSL => true;
 
@@ -78,7 +79,7 @@ public class GremlinClient
             SendRequest(query);
         }
     }
-            
+          
     public void InsertCast(MovieAnalyzer.Models.Person cast)
     {
         InsertPerson(cast, "cast");       
@@ -152,13 +153,12 @@ public class GremlinClient
     {
             if(!DirectionExists(movieId, directorId))
             {
-            string query =  $"g.V('{movieId}')"+
-                $".addE('directedBy')"+
-                $".to(g.V('{directorId}'))";            
+                string query =  $"g.V('{movieId}')"+
+                    $".addE('directedBy')"+
+                    $".to(g.V('{directorId}'))";            
 
-            SendRequest(query); 
-        }
-            
+                SendRequest(query); 
+            }
     }
 
     public void InsertProduction(string movieId, string countryCode)
@@ -186,6 +186,31 @@ public class GremlinClient
             SendRequest(query); 
         }
         
+    }
+
+    public void InsertAdjetiveToCharacter(string movieid, string actorid, string adj)
+    {
+        string adjetive = "adj";
+        string queryEdge = $" g.V().hasId('{actorid}').outE('plays').as('e').inV().hasId('{movieid}').select('e').properties().hasKey('{adjetive}')";
+        
+        //look for adjetives already includes in the edge
+        bool found = false;
+        int index = 1;
+
+        while(!found) 
+        {
+            adjetive = "adj" + index;
+            queryEdge = $" g.V().hasId('{actorid}').outE('plays').as('e').inV().hasId('{movieid}').select('e').properties().hasKey('{adjetive}')";
+            var resultSet = SubmitRequest(gremlinClient, queryEdge).Result;
+            found = (resultSet.Count == 0);            
+            if(!found)
+            {
+                index++;
+            }
+        }
+        adjetive = "adj" + index;
+        queryEdge = $" g.V().hasId('{actorid}').outE('plays').as('e').inV().hasId('{movieid}').select('e').property('{adjetive}', '{adj}')";
+        SendRequest(queryEdge); 
     }
 
     public void Clean()

@@ -12,7 +12,7 @@ class Program
         Console.WriteLine("2. Save movie overviews in a CSV for test analysis.");
         Console.WriteLine("3. Load adjetives into characters");
         Console.WriteLine("Other. Exit program");
-        var option = 1; //Console.Read();
+        var option = 3; //Console.Read();
 
         if( option == 1)
         {
@@ -25,7 +25,7 @@ class Program
             var watch = new System.Diagnostics.Stopwatch();            
             watch.Start();
 
-            await movieetl.ReadAndWriteMoviesAsync(1970, 300, moviesWithError);
+            await movieetl.ReadAndWriteMoviesAsync(2021, 3, moviesWithError);
             Console.WriteLine("Movies with error!! :");
             Console.WriteLine(string.Join(", ", moviesWithError));
             watch.Stop();
@@ -42,7 +42,8 @@ class Program
         else if (option == 3)
         {
             Console.WriteLine("You have chosen option 3");
-            throw new NotImplementedException("Not yet");
+            MovieRoles roles = new MovieRoles();
+            roles.OpenFile();
         }
         else 
         {
