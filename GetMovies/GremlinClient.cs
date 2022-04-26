@@ -57,8 +57,6 @@ public class GremlinClient
     }
 
 
-
-
     /**Insert nodes **/
     public void InsertMovie(MovieAnalyzer.Models.Movie movie)
     {
@@ -213,6 +211,46 @@ public class GremlinClient
         SendRequest(queryEdge); 
     }
 
+    public void InsertAdjetiveToProtagonist(string movieid, string adj, string noun, PersonGender gender)
+    {
+        //search movie: 
+        var query = $"g.V().hasLabel('movie').has('id', '{movieid}')";
+        var resultSet = SubmitRequest(gremlinClient, query).Result;
+        
+        foreach(var result in resultSet)
+        {
+            string title = String.Empty;
+            var properties = result["properties"]["title"]; 
+            foreach (var property in properties)
+            {
+                title = property["value"].ToString();
+            }
+             //movie title    
+            Console.WriteLine("Movie: " + title + ", Adj: " + adj + ", Noun: " + noun);
+        }
+
+
+        //a partir de una película, coger la primera actriz en orden de importancia.
+
+        var queryGetCharacters = $"g.V().hasId('{movieid}').inE('plays')";
+        var charactersResultSet = SubmitRequest(gremlinClient, query).Result;
+
+        foreach(var character in charactersResultSet)
+        {
+            //save:
+            // var importance_level
+            // var outV (actorId)
+            // var edgeId
+
+        }
+           
+
+        
+
+  
+
+
+    }
     public void Clean()
     {
         string query =  $"g.V().drop()";

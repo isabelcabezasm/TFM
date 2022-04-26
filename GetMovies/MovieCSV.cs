@@ -10,19 +10,17 @@ public class MovieCSV
     public MovieCSV()
     {
     //    getMoviesAsync().Wait();
-    }
+    }     
 
-     
-
-    public List<CSVRow> OpenCSVFileToRead(string path)
+    public List<T> OpenCSVFileToRead<T>(string path)
     {        
         //Open file
         using var streamReader = File.OpenText(path);
         using var csvReader = new CsvReader(streamReader, GetCsvConfiguration());
-        var filerows = csvReader.GetRecords<CSVRow>();
+        var filerows = csvReader.GetRecords<T>();
 
         //load rows into a list
-        List<CSVRow> rows = new List<CSVRow>();
+        List<T> rows = new List<T>();
         foreach(var row in filerows)
         {
             rows.Add(row);

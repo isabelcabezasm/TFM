@@ -9,8 +9,9 @@ class Program
 
         Console.WriteLine("Select an option: ");
         Console.WriteLine("1. Get movies from TMDB and save them in Cosmos DB");
-        Console.WriteLine("2. Save movie overviews in a CSV for test analysis.");
+        Console.WriteLine("2. Save movie overviews in a CSV for text analysis.");
         Console.WriteLine("3. Load adjetives into characters");
+        Console.WriteLine("4. Load adjetives into protagonists");
         Console.WriteLine("Other. Exit program");
         var option = 3; //Console.Read();
 
@@ -43,6 +44,13 @@ class Program
         {
             Console.WriteLine("You have chosen option 3");
             MovieRoles roles = new MovieRoles();
+            roles.InsertAdjetivesFromCharacterCSVFile();
+        }
+        else if (option == 4)
+        {
+            Console.WriteLine("You have chosen option 4");
+            MovieRoles roles = new MovieRoles();
+            roles.InsertAdjetivesFromCSVFile();
         }
         else 
         {
