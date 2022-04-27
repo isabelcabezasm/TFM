@@ -191,27 +191,31 @@ public class GremlinClient
         string adjetive = "adj";
         string queryEdge = $" g.V().hasId('{actorid}').outE('plays').as('e').inV().hasId('{movieid}').select('e').properties().hasKey('{adjetive}')";
 
-        // TODO: if adjetive doesn't exist
-        
-        
-        //look for adjetives already includes in the edge
-        bool found = false;
-        int index = 1;
-
-        while(!found) 
+        // if adjetive doesn't exist
+        if(!AdjetiveExists(movieid, actorid, adj))
         {
-            adjetive = "adj" + index;
-            queryEdge = $" g.V().hasId('{actorid}').outE('plays').as('e').inV().hasId('{movieid}').select('e').properties().hasKey('{adjetive}')";
-            var resultSet = SubmitRequest(gremlinClient, queryEdge).Result;
-            found = (resultSet.Count == 0);            
-            if(!found)
+            //look for adjetives already includes in the edge
+            bool found = false;
+            int index = 1;
+
+            while(!found) 
             {
-                index++;
+                adjetive = "adj" + index;
+                queryEdge = $" g.V().hasId('{actorid}').outE('plays').as('e').inV().hasId('{movieid}').select('e').properties().hasKey('{adjetive}')";
+                var resultSet = SubmitRequest(gremlinClient, queryEdge).Result;
+                found = (resultSet.Count == 0);            
+                if(!found)
+                {
+                    index++;
+                }
             }
+            adjetive = "adj" + index;
+            queryEdge = $" g.V().hasId('{actorid}').outE('plays').as('e').inV().hasId('{movieid}').select('e').property('{adjetive}', '{adj}')";
+            SendRequest(queryEdge); 
+
         }
-        adjetive = "adj" + index;
-        queryEdge = $" g.V().hasId('{actorid}').outE('plays').as('e').inV().hasId('{movieid}').select('e').property('{adjetive}', '{adj}')";
-        SendRequest(queryEdge); 
+        
+      
     }
 
     public void InsertAdjetiveToProtagonist(string movieid, string adj, string noun, PersonGender gender)
@@ -292,6 +296,18 @@ public class GremlinClient
     {
         string query =  $"g.V().drop()";
         SendRequest(query);
+    }
+
+    private bool AdjetiveExists(string movieId, string personId, string adjetive)
+    {
+        // //for each property, check if the adj exist:
+        // var queryEdge = $" g.V().hasId('{personId}').outE('plays').as('e').inV().hasId('{movieId}').select('e').properties().hasKey('adj1')";
+        // var resultSet = SubmitRequest(gremlinClient, queryEdge).Result;
+
+        var queryEdge = $" g.V().hasId('{personId}').outE('plays').as('e').inV().hasId('{movieId}').select('e').properties().hasValue('{adjetive}')";
+        var resultSet = SubmitRequest(gremlinClient, queryEdge).Result;
+        return (resultSet.Count > 0);
+
     }
 
     public bool MovieExists(string movieId)
