@@ -12,8 +12,9 @@ class Program
         Console.WriteLine("2. Save movie overviews in a CSV for text analysis.");
         Console.WriteLine("3. Load adjetives into characters");
         Console.WriteLine("4. Load adjetives into protagonists");
+        Console.WriteLine("5. Save adjetives and ages into a csv file");
         Console.WriteLine("Other. Exit program");
-        var option = 3; //Console.Read();
+        var option = 5; //Console.Read();
 
         if( option == 1)
         {
@@ -51,6 +52,12 @@ class Program
             Console.WriteLine("You have chosen option 4");
             MovieRoles roles = new MovieRoles();
             roles.InsertAdjetivesFromCSVFile();
+        }
+        else if (option == 5)
+        {
+            Console.WriteLine("You have chosen option 4");
+            MovieCSV csv = new MovieCSV();
+            csv.SaveAdjetivesAndAgeCSVFile();
         }
         else 
         {

@@ -7,9 +7,10 @@ namespace MovieAnalyzer;
 
 public class MovieCSV
 {
+    private GremlinClient gclient;
     public MovieCSV()
     {
-    //    getMoviesAsync().Wait();
+        gclient = new GremlinClient();  
     }     
 
     public List<T> OpenCSVFileToRead<T>(string path)
@@ -29,7 +30,59 @@ public class MovieCSV
         return rows;
     }
 
-     private static CsvConfiguration GetCsvConfiguration()
+    public void SaveAdjetivesAndAgeCSVFile()
+    {       
+
+        PersonGender gender = PersonGender.Male;
+        var characters = gclient.GetCharactersWithAdjetives(gender);
+        var rows = GetRows(characters, gender);
+        SaveRows(rows);
+
+    }
+
+    private List<AdjetiveAndAgeCSVRow> GetRows(List<TempCharacter> characters, PersonGender gender)
+    {
+        List<AdjetiveAndAgeCSVRow> totalRows = new List<AdjetiveAndAgeCSVRow>();
+        foreach(var character in characters)
+        {
+            var releaseyear = gclient.GetMovieReleaseYear(character.movieId);
+
+            foreach (var adjetive in character.adjetives)
+            {
+                AdjetiveAndAgeCSVRow row = new AdjetiveAndAgeCSVRow
+                {
+                    year = releaseyear,
+                    age = character.age, 
+                    gender = gender.ToString(),
+                    adj = adjetive
+                };
+                
+                totalRows.Add(row);
+            }
+        }
+
+        return totalRows;
+    }
+    
+    private void SaveRows(List<AdjetiveAndAgeCSVRow> rows)
+    {
+        using var fs = new StreamWriter($"CSV\\adjetives_male_for_powerbi.csv");
+        using var csvWriter = new CsvWriter(fs, GetCsvConfiguration());
+        AddHeadersAdjetivesFile(csvWriter);
+
+        foreach (var row in rows)
+        {
+            csvWriter.WriteField(row.year);
+            csvWriter.WriteField(row.age);
+            csvWriter.WriteField(row.gender);
+            csvWriter.WriteField(row.adj);
+            csvWriter.NextRecord();
+        }           
+
+        csvWriter.Flush();
+    }
+    
+    private static CsvConfiguration GetCsvConfiguration()
     {
         var csvConfig = new CsvConfiguration(CultureInfo.CurrentCulture)
         {
@@ -41,6 +94,16 @@ public class MovieCSV
         return csvConfig;
     }
 
+    private static void AddHeadersAdjetivesFile(CsvWriter csvWriter)
+    {
+        csvWriter.WriteField("year");
+        csvWriter.WriteField("age");
+        csvWriter.WriteField("gender");
+        csvWriter.WriteField("adj");        
+        csvWriter.NextRecord();
+    }
+
+}
 
     //     public async Task<List<MovieAnalyzer.Models.Movie>> getMoviesDTO(int year, int num)
     // {
@@ -119,17 +182,7 @@ public class MovieCSV
     //     }
 
     // }
-    // private static CsvConfiguration GetCsvConfiguration()
-    // {
-    //     var csvConfig = new CsvConfiguration(CultureInfo.CurrentCulture)
-    //     {
-    //         HasHeaderRecord = true,
-    //         Comment = '#',
-    //         AllowComments = true,
-    //         Delimiter = ";",
-    //     };
-    //     return csvConfig;
-    // }
+
 
 
     // private static void AddOverview(string overview, CsvWriter csvWriter)
@@ -175,4 +228,4 @@ public class MovieCSV
     //     csvWriter.NextRecord();
     // }
     
-}
+

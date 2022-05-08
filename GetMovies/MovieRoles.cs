@@ -35,16 +35,7 @@ public class MovieRoles
             Console.WriteLine(row.year + " - " + row.movieid + " - " + gclient.GetMovieTitle(row.movieid+ "m") + " -  " + row.adj + " - " + row.noun);            
             gclient.InsertAdjetiveToProtagonist(row.movieid + "m", row.adj, row.noun, PersonGender.Female);
         }
-
-        // //Get Rows
-        // filerows = csv.OpenCSVFileToRead<AdjetivesCSVRow>("CSV\\all_adjetives_male.csv");
-        // foreach (var row in filerows)
-        // {
-        //     Console.WriteLine(row.year + " - " + row.movieid + " - " + row.adj + " - " + row.noun);            
-        //     gclient.InsertAdjetiveToProtagonist(row.movieid + "m", row.adj, row.noun, PersonGender.Male);
-        // }
     }  
-
 
 }
 
