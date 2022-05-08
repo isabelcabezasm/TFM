@@ -228,6 +228,47 @@ public class GremlinClient
 
     }
 
+
+    public List<TempCharacter> GetCharactersWithAdjetives(PersonGender gender)
+    {
+        List<TempCharacter> edges = new List<TempCharacter>();
+        //get all the edges with at least one adjetive
+        string query = $"g.V().has('gender', '{gender}').outE('plays').has('adj1')";
+        var resultSet = SubmitRequest(gremlinClient, query).Result;
+        
+        foreach(var edge in resultSet)
+        {
+            TempCharacter character = new TempCharacter
+            {
+                movieId = edge["inV"],
+                actorId = edge["outV"],
+                age = int.Parse(edge["properties"]["age"].ToString())
+            };
+
+            int index = 1;
+            bool found = true;
+            string adjetive = "adj";
+
+            while(found)
+            {
+                adjetive = "adj" + index;
+                var queryEdge = $" g.V().hasId('{character.actorId}').outE('plays').as('e').inV().hasId('{character.movieId}').select('e').properties().hasKey('{adjetive}')";
+                var resultSet2 = SubmitRequest(gremlinClient, queryEdge).Result;
+                found = (resultSet2.Count > 0);            
+                if(found)
+                {
+                    index++;
+                    character.adjetives.Add(edge["properties"][adjetive]);
+                }
+            }
+
+            edges.Add(character);
+
+        }
+
+        return edges;
+    }
+
     //given a movie (movieid) 
     //returns the first (most important) actor or actress (depending of the parameter gender)
     private TempCharacter GetFirstCharacter(string movieid, PersonGender gender)
@@ -290,6 +331,26 @@ public class GremlinClient
             }         
         }
         return title;
+    }
+
+    public int GetMovieReleaseYear(string movieid)
+    {
+        int year = 0;
+        //search movie: 
+        var query = $"g.V().hasLabel('movie').has('id', '{movieid}')";
+        var resultSet = SubmitRequest(gremlinClient, query).Result;
+                
+        foreach(var result in resultSet)
+        {
+            
+            var properties = result["properties"]["release_year"]; 
+            foreach (var property in properties)
+            {
+                year = int.Parse(property["value"].ToString());
+            }         
+        }
+        return year;
+
     }
 
     public void Clean()
@@ -528,5 +589,7 @@ public class TempCharacter
     public string movieId = String.Empty;
     public string actorId = String.Empty;
     public int level = 0;
+    public int age = 0;
+    public List<string> adjetives = new List<string>();
 
 }

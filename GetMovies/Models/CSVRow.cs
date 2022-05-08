@@ -24,3 +24,12 @@ public class AdjetivesCSVRow
     public    string noun {get; set; }
     
 }
+
+public class AdjetiveAndAgeCSVRow
+{
+    public int year {get; set; }
+    public int age {get; set; }
+    public string gender {get; set; }
+    public string adj {get; set; }
+    
+}
