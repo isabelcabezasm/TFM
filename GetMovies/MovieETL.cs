@@ -91,8 +91,7 @@ public class MovieETL
 
 
     }
-
-    
+  
 
 
     private static void printError(String message, string movieId)
