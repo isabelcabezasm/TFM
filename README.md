@@ -20,7 +20,7 @@ In this repo the program "Movies", the jupyter notebooks for text analysis and t
 
 Here is the class schema for the pgrogram `GetMovies`:
 
-![Class Schema for GetMovies program](img/class-schema.png)
+![Class Schema for GetMovies program](img/schema-class.png)
 
 Where `TMDBClient` and `GremlinClient` are the client to the TMDB API and the DB.
 
