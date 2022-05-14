@@ -58,7 +58,7 @@ or adding the section "env" in the launch.json file:
 "env": {
     "Host": "<server name>.gremlin.cosmos.azure.com:443/",
     "PrimaryKey": "<primary key - cosmos db>",
-    "DatabaseName":"<db anme of cosmos db>",
+    "DatabaseName":"<db name of cosmos db>",
     "ContainerName":"<container name of cosmos db>",
     "TMDBtoken":"<token>"
 }

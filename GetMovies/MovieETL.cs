@@ -14,6 +14,14 @@ public class MovieETL
     }  
 
 
+    /*** 
+    * ETL Main class
+    * 1) The list of movies is extracted from TMDB API 
+    * 2) For each movie: save movie, director, gendres, production country.
+    * 3) Read / extract casting details
+    * 4) For each cast person: 
+    * 5) Save person.
+    ****/
 
     public async Task ReadAndWriteMoviesAsync(int year, int num, List<string> moviesError)
     {       
@@ -43,6 +51,7 @@ public class MovieETL
                     foreach(var director in movie.Directors)
                     {
                         connector.InsertDirector(director);
+                        // Insert director as a person
                         connector.InsertDirection(movie.MovieId, director.PersonId);
                     }
                 }                
@@ -74,7 +83,9 @@ public class MovieETL
                     {
                         if (character.Actor != null)
                         {
+                            // Insert actor as a "person" node. 
                             connector.InsertCast(character.Actor);
+                            // Vertex                            
                             connector.InsertInterpretation(character);
                         }
                     }

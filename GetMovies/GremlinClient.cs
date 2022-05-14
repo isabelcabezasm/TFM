@@ -57,7 +57,7 @@ public class GremlinClient
     }
 
 
-    /**Insert nodes **/
+    /**Insert nodes **/ 
     public void InsertMovie(MovieAnalyzer.Models.Movie movie)
     {
         // we should have the modified ID CHECK
@@ -229,6 +229,8 @@ public class GremlinClient
     }
 
 
+    /** Get Information from Gremlin DB**/
+
     public List<TempCharacter> GetCharactersWithAdjetives(PersonGender gender)
     {
         List<TempCharacter> edges = new List<TempCharacter>();
@@ -268,6 +270,66 @@ public class GremlinClient
 
         return edges;
     }
+
+    public string GetMovieTitle(string movieid)
+        {
+            string title = String.Empty;
+            //search movie: 
+            var query = $"g.V().hasLabel('movie').has('id', '{movieid}')";
+            var resultSet = SubmitRequest(gremlinClient, query).Result;
+                    
+            foreach(var result in resultSet)
+            {
+                
+                var properties = result["properties"]["title"]; 
+                foreach (var property in properties)
+                {
+                    title = property["value"].ToString();
+                }         
+            }
+            return title;
+        }
+
+    public int GetMovieReleaseYear(string movieid)
+    {
+        int year = 0;
+        //search movie: 
+        var query = $"g.V().hasLabel('movie').has('id', '{movieid}')";
+        var resultSet = SubmitRequest(gremlinClient, query).Result;
+                
+        foreach(var result in resultSet)
+        {
+            
+            var properties = result["properties"]["release_year"]; 
+            foreach (var property in properties)
+            {
+                year = int.Parse(property["value"].ToString());
+            }         
+        }
+        return year;
+    }
+
+    /** We have several methods that check if nodes or vertices exist.
+    * Almost all of them are used only from this class.
+    * Except this one: MovieExist. 
+    * The ETL will check if the movie exists, and if not it will save it in the db.
+    * If the movie exist, the ETL class skip that movie. **/
+    public bool MovieExists(string movieId)
+    {
+        var query = $"g.V().hasLabel('movie').has('id', '{movieId}')";
+        
+        // Console.WriteLine(String.Format("Running this query: {0}", query));
+        var resultSet = SubmitRequest(gremlinClient, query).Result;
+        return (resultSet.Count > 0);
+    }
+
+    /* For tests (in the development phase), sometimes, clean the db is needed.    */
+    public void Clean()
+    {
+        string query =  $"g.V().drop()";
+        SendRequest(query);
+    }
+
 
     //given a movie (movieid) 
     //returns the first (most important) actor or actress (depending of the parameter gender)
@@ -314,52 +376,7 @@ public class GremlinClient
         return first;
     }
 
-    public string GetMovieTitle(string movieid)
-    {
-        string title = String.Empty;
-        //search movie: 
-        var query = $"g.V().hasLabel('movie').has('id', '{movieid}')";
-        var resultSet = SubmitRequest(gremlinClient, query).Result;
-                
-        foreach(var result in resultSet)
-        {
-            
-            var properties = result["properties"]["title"]; 
-            foreach (var property in properties)
-            {
-                title = property["value"].ToString();
-            }         
-        }
-        return title;
-    }
-
-    public int GetMovieReleaseYear(string movieid)
-    {
-        int year = 0;
-        //search movie: 
-        var query = $"g.V().hasLabel('movie').has('id', '{movieid}')";
-        var resultSet = SubmitRequest(gremlinClient, query).Result;
-                
-        foreach(var result in resultSet)
-        {
-            
-            var properties = result["properties"]["release_year"]; 
-            foreach (var property in properties)
-            {
-                year = int.Parse(property["value"].ToString());
-            }         
-        }
-        return year;
-
-    }
-
-    public void Clean()
-    {
-        string query =  $"g.V().drop()";
-        SendRequest(query);
-    }
-
-    private bool AdjetiveExists(string movieId, string personId, string adjetive)
+      private bool AdjetiveExists(string movieId, string personId, string adjetive)
     {
         // //for each property, check if the adj exist:
         // var queryEdge = $" g.V().hasId('{personId}').outE('plays').as('e').inV().hasId('{movieId}').select('e').properties().hasKey('adj1')";
@@ -371,16 +388,7 @@ public class GremlinClient
 
     }
 
-    public bool MovieExists(string movieId)
-    {
-        var query = $"g.V().hasLabel('movie').has('id', '{movieId}')";
-        
-        // Console.WriteLine(String.Format("Running this query: {0}", query));
-        var resultSet = SubmitRequest(gremlinClient, query).Result;
-        return (resultSet.Count > 0);
-    }
-
-    public bool NodeExists(string id)
+    private bool NodeExists(string id)
     {
         var query = $"g.V().has('id', '{id}')";
         
@@ -480,8 +488,6 @@ public class GremlinClient
         return (resultSet.Count > 0); 
 
     }       
-
-
 
 
 
